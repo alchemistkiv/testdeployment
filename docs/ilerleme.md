@@ -46,6 +46,10 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- Kalite geçişi (simplify): Lobby'deki 3 tekrar eden abonelik bloğu ortak
+  `lib/useSessionChannel` hook'una alındı; kartlar (oturumda değişmez) artık her
+  olayda değil bir kez yüklenir (mükerrer loadCards giderildi). matched/cardCount
+  artık türetiliyor. 3 ajanlı inceleme; ihmal edilebilir bulgular atlandı. Prod deploy.
 - B18: layout metadata'ya Open Graph + Twitter + appleWebApp (link paylaşım
   önizlemesi). Mevcut title/description/themeColor zaten vardı. Prod deploy.
 - B17: smoke harness dayanıklılaştırıldı (realtime poll + prod 3 deneme); 3/3 PASS.

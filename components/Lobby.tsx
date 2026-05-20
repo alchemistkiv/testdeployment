@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import {
   requiredVotes,
   thresholdSummary,
@@ -8,14 +8,9 @@ import {
   type Session,
 } from "@/lib/session";
 import type { Card } from "@/lib/cards";
-import {
-  listParticipants,
-  loadCards,
-  loadMatches,
-  loadVotes,
-  subscribeTable,
-} from "@/lib/db";
+import { listParticipants, loadCards, loadMatches, loadVotes } from "@/lib/db";
 import { finishedUserIds } from "@/lib/match";
+import { useSessionChannel } from "@/lib/useSessionChannel";
 
 export function Lobby({
   session,
@@ -30,52 +25,37 @@ export function Lobby({
   const [participants, setParticipants] = useState<Participant[]>(
     session.participants
   );
-  const [matched, setMatched] = useState<Card[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [matchedIds, setMatchedIds] = useState<string[]>([]);
   const [finished, setFinished] = useState(0);
-  const [cardCount, setCardCount] = useState(0);
+  const cardsRef = useRef<Card[]>([]);
 
-  // Realtime: biri katılınca liste canlı güncellensin.
-  useEffect(() => {
-    try {
-      const refresh = () =>
-        listParticipants(session.id).then(setParticipants).catch(() => {});
-      refresh();
-      return subscribeTable("participants", session.id, refresh);
-    } catch {
-      // Supabase env yoksa (ör. test) realtime'ı atla.
-    }
-  }, [session.id]);
+  // Kartlar oturum boyunca değişmez → bir kez yükle (realtime'da değil).
+  useSessionChannel("participants", session.id, () =>
+    listParticipants(session.id).then(setParticipants).catch(() => {})
+  );
 
-  // Realtime: grup bir kartta eşleşince lobide canlı görünsün.
-  useEffect(() => {
-    const refresh = () =>
-      Promise.all([loadMatches(session.id), loadCards(session.id)])
-        .then(([ids, cards]) => setMatched(cards.filter((c) => ids.includes(c.id))))
-        .catch(() => {});
-    try {
-      refresh();
-      return subscribeTable("matches", session.id, refresh);
-    } catch {
-      // env yoksa atla
-    }
-  }, [session.id]);
+  useSessionChannel("matches", session.id, () =>
+    loadMatches(session.id).then(setMatchedIds).catch(() => {})
+  );
 
-  // Realtime: kaç kişi destesini bitirdi (tüm kartları oyladı).
-  useEffect(() => {
-    const refresh = () =>
-      Promise.all([loadVotes(session.id), loadCards(session.id)])
-        .then(([votes, cards]) => {
-          setCardCount(cards.length);
-          setFinished(finishedUserIds(votes, cards.length).length);
-        })
-        .catch(() => {});
-    try {
-      refresh();
-      return subscribeTable("votes", session.id, refresh);
-    } catch {
-      // env yoksa atla
+  useSessionChannel("votes", session.id, async () => {
+    // Deste henüz elde yoksa (oturum açıkken üretilmiş olabilir) bir kez çek.
+    if (cardsRef.current.length === 0) {
+      try {
+        const c = await loadCards(session.id);
+        cardsRef.current = c;
+        setCards(c);
+      } catch {
+        return;
+      }
     }
-  }, [session.id]);
+    const votes = await loadVotes(session.id).catch(() => []);
+    setFinished(finishedUserIds(votes, cardsRef.current.length).length);
+  });
+
+  const matched = cards.filter((c) => matchedIds.includes(c.id));
+  const cardCount = cards.length;
 
   function copyCode() {
     navigator.clipboard?.writeText(session.code).then(
