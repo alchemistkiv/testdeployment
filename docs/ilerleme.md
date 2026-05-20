@@ -28,13 +28,15 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B5: Oturumdan ayrılma — `leaveSessionDb` katılımcıyı siler; lobi listesi
       herkes için canlı düşer. Smoke'a ayrılma kontrolü eklendi.
 - [ ] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç; aria etiketleri.
-- [ ] B7: `lib/db` map fonksiyonlarını saf yardımcılara ayır + birim test.
+- [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
 - [ ] B8: README / kurulum + mimari özeti.
 - [x] B9: OSM dayanıklılık — runOverpass'a istek başına abort (20s) + 2 tur retry;
       searchPlaces boş gelirse yarıçapı 2x büyütüp tekrar dener. (yerel 3/3 PASS)
-- [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
+- [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B7: lib/db map fonksiyonları lib/dbMap.ts'e taşındı (saf) + 4 test. Refactor,
+  davranış aynı → redeploy yok. (B10, B9 içinde karşılandı olarak işaretlendi.)
 - B9: OSM dayanıklılık (abort timeout + 2 tur retry + boşsa 2x yarıçap). Overpass
   ara sıra timeout sorununu hedefler; yerel /api/cards 3/3 kart döndü. Prod deploy.
 - B5: oturumdan ayrılınca katılımcı DB'den silinir (leaveSessionDb); smoke'a

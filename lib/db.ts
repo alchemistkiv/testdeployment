@@ -12,29 +12,14 @@ import {
   type ThresholdType,
 } from "./session";
 import type { Vote } from "./match";
-
-type SessionRow = {
-  id: string;
-  code: string;
-  topic: string;
-  threshold_type: ThresholdType;
-  threshold_count: number | null;
-  host_user_id: string;
-  created_at: string;
-};
-
-function rowToSession(s: SessionRow, participants: Participant[]): Session {
-  return {
-    id: s.id,
-    code: s.code,
-    topic: s.topic,
-    thresholdType: s.threshold_type,
-    thresholdCount: s.threshold_count,
-    hostUserId: s.host_user_id,
-    createdAt: s.created_at,
-    participants,
-  };
-}
+import {
+  cardToRow,
+  rowToCard,
+  rowToParticipant,
+  rowToSession,
+  rowToVote,
+  type SessionRow,
+} from "./dbMap";
 
 export async function listParticipants(sessionId: string): Promise<Participant[]> {
   const sb = getSupabase();
@@ -44,7 +29,7 @@ export async function listParticipants(sessionId: string): Promise<Participant[]
     .eq("session_id", sessionId)
     .order("joined_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map((p) => ({ userId: p.user_id, name: p.name }));
+  return (data ?? []).map(rowToParticipant);
 }
 
 export async function createSessionDb(input: {
@@ -136,19 +121,7 @@ export async function loadSession(sessionId: string): Promise<Session | null> {
 export async function saveCards(sessionId: string, cards: Card[]): Promise<void> {
   if (cards.length === 0) return;
   const sb = getSupabase();
-  const rows = cards.map((c, i) => ({
-    session_id: sessionId,
-    osm_id: c.id,
-    position: i,
-    name: c.name,
-    category: c.category,
-    photo_url: c.photoUrl,
-    rating: c.rating,
-    price_level: c.priceLevel,
-    distance_m: c.distanceMeters,
-    address: c.address,
-    open_now: c.openNow,
-  }));
+  const rows = cards.map((c, i) => cardToRow(sessionId, c, i));
   const { error } = await sb
     .from("cards")
     .upsert(rows, { onConflict: "session_id,osm_id", ignoreDuplicates: true });
@@ -164,17 +137,7 @@ export async function loadCards(sessionId: string): Promise<Card[]> {
     .eq("session_id", sessionId)
     .order("position", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map((r) => ({
-    id: r.id,
-    name: r.name,
-    category: r.category,
-    photoUrl: r.photo_url,
-    rating: r.rating,
-    priceLevel: r.price_level,
-    distanceMeters: r.distance_m,
-    address: r.address,
-    openNow: r.open_now,
-  }));
+  return (data ?? []).map(rowToCard);
 }
 
 // --- Oylar & eşleşmeler ---
@@ -202,11 +165,7 @@ export async function loadVotes(sessionId: string): Promise<Vote[]> {
     .select("user_id,card_id,liked")
     .eq("session_id", sessionId);
   if (error) throw error;
-  return (data ?? []).map((v) => ({
-    userId: v.user_id,
-    cardId: v.card_id,
-    liked: v.liked,
-  }));
+  return (data ?? []).map(rowToVote);
 }
 
 export async function recordMatch(sessionId: string, cardId: string): Promise<void> {
