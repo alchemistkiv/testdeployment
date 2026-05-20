@@ -46,6 +46,9 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- Test kapsamı: JoinSession (kod doğrulama/uppercase/hata) ve CardFace (isim/kategori/
+  placeholder emoji/puan-fiyat-mesafe-açık) için bileşen testleri eklendi (64/64).
+  Test-only → redeploy yok.
 - Kalite geçişi (simplify): Lobby'deki 3 tekrar eden abonelik bloğu ortak
   `lib/useSessionChannel` hook'una alındı; kartlar (oturumda değişmez) artık her
   olayda değil bir kez yüklenir (mükerrer loadCards giderildi). matched/cardCount
