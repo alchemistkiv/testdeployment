@@ -30,10 +30,13 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [ ] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç; aria etiketleri.
 - [ ] B7: `lib/db` map fonksiyonlarını saf yardımcılara ayır + birim test.
 - [ ] B8: README / kurulum + mimari özeti.
-- [ ] B9: Kart üretimi başarısızsa "tekrar dene" + kısmi sonuç toleransı.
+- [x] B9: OSM dayanıklılık — runOverpass'a istek başına abort (20s) + 2 tur retry;
+      searchPlaces boş gelirse yarıçapı 2x büyütüp tekrar dener. (yerel 3/3 PASS)
 - [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
 
 Loop günlüğü (en yeni üstte):
+- B9: OSM dayanıklılık (abort timeout + 2 tur retry + boşsa 2x yarıçap). Overpass
+  ara sıra timeout sorununu hedefler; yerel /api/cards 3/3 kart döndü. Prod deploy.
 - B5: oturumdan ayrılınca katılımcı DB'den silinir (leaveSessionDb); smoke'a
   ayrılma kontrolü. Gözlem: prod /api/cards ara sıra boş (OSM timeout) → sıradaki B9.
 - B4: SwipeDeck güncel kartta canlı "n/N kişi beğendi" göstergesi. Prod deploy.

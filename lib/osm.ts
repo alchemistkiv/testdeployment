@@ -15,31 +15,40 @@ const USER_AGENT = "balichoice/0.1 (group decision app)";
 const SEARCH_RADIUS = 2500;
 
 // Overpass'ı çalıştırır; bir sunucu hata/timeout verirse sıradakine geçer.
+// Public sunucular yük altında takılabildiği için: her isteğe abort timeout
+// (askıda kalan sunucuda beklemeyip diğerine geç) + tüm listeyi 2 tur dene.
 // Önemli: Overpass HTTP 200 dönüp gövdede "remark" ile timeout bildirebiliyor.
 async function runOverpass(ql: string): Promise<unknown[]> {
   let lastError: Error | null = null;
-  for (const url of OVERPASS_ENDPOINTS) {
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "User-Agent": USER_AGENT,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `data=${encodeURIComponent(ql)}`,
-      });
-      if (!res.ok) {
-        lastError = new Error(`Overpass ${res.status}`);
-        continue;
+  for (let round = 0; round < 2; round++) {
+    for (const url of OVERPASS_ENDPOINTS) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000);
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "User-Agent": USER_AGENT,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: `data=${encodeURIComponent(ql)}`,
+          signal: ctrl.signal,
+        });
+        if (!res.ok) {
+          lastError = new Error(`Overpass ${res.status}`);
+          continue;
+        }
+        const data = (await res.json()) as { elements?: unknown[]; remark?: string };
+        if (typeof data.remark === "string" && /timed out|error/i.test(data.remark)) {
+          lastError = new Error(`Overpass: ${data.remark}`);
+          continue;
+        }
+        return Array.isArray(data.elements) ? data.elements : [];
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error("Overpass bağlantı hatası");
+      } finally {
+        clearTimeout(timer);
       }
-      const data = (await res.json()) as { elements?: unknown[]; remark?: string };
-      if (typeof data.remark === "string" && /timed out|error/i.test(data.remark)) {
-        lastError = new Error(`Overpass: ${data.remark}`);
-        continue;
-      }
-      return Array.isArray(data.elements) ? data.elements : [];
-    } catch (e) {
-      lastError = e instanceof Error ? e : new Error("Overpass bağlantı hatası");
     }
   }
   throw lastError ?? new Error("Overpass erişilemedi.");
@@ -97,22 +106,25 @@ export async function searchPlaces(
 
   // Bounding-box (around yerine): poligonlarda çok daha hızlı ve public
   // sunucularda güvenilir. Mesafeyi yine merkeze göre haversine ile hesaplarız.
-  const latDelta = SEARCH_RADIUS / 111320;
-  const lonDelta =
-    SEARCH_RADIUS / (111320 * Math.cos((center.lat * Math.PI) / 180));
-  const bbox = `${center.lat - latDelta},${center.lon - lonDelta},${
-    center.lat + latDelta
-  },${center.lon + lonDelta}`;
-
-  // Her anlamsal tür bir veya birden çok OSM seçicisine açılır.
   // İlişkileri (relation) atlayıp node+way (nw) kullanmak sorguyu hafifletir.
-  const selectors = useKinds
-    .flatMap((k) => KIND_SELECTORS[k])
-    .map((sel) => `nw[${sel}][name](${bbox});`)
-    .join("");
-  const ql = `[out:json][timeout:25];(${selectors});out center 60;`;
+  const buildQl = (radius: number) => {
+    const latDelta = radius / 111320;
+    const lonDelta = radius / (111320 * Math.cos((center.lat * Math.PI) / 180));
+    const bbox = `${center.lat - latDelta},${center.lon - lonDelta},${
+      center.lat + latDelta
+    },${center.lon + lonDelta}`;
+    const selectors = useKinds
+      .flatMap((k) => KIND_SELECTORS[k])
+      .map((sel) => `nw[${sel}][name](${bbox});`)
+      .join("");
+    return `[out:json][timeout:25];(${selectors});out center 60;`;
+  };
 
-  const elements = await runOverpass(ql);
+  // Boş gelirse (seyrek bölge) yarıçapı bir kez genişletip tekrar dene.
+  let elements = await runOverpass(buildQl(SEARCH_RADIUS));
+  if (elements.length === 0) {
+    elements = await runOverpass(buildQl(SEARCH_RADIUS * 2));
+  }
 
   // İsme göre tekilleştir.
   const seen = new Set<string>();
