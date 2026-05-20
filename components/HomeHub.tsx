@@ -3,10 +3,12 @@
 export function HomeHub({
   name,
   onCreate,
+  onJoin,
   onReset,
 }: {
   name: string;
   onCreate: () => void;
+  onJoin: () => void;
   onReset: () => void;
 }) {
   return (
@@ -29,11 +31,10 @@ export function HomeHub({
         </button>
 
         <button
-          disabled
-          className="mt-3 w-full rounded-2xl border-2 border-ink/10 py-4 text-lg font-bold text-ink/40"
+          onClick={onJoin}
+          className="mt-3 w-full rounded-2xl border-2 border-brand/30 bg-white py-4 text-lg font-bold text-brand transition active:scale-[0.97]"
         >
-          🔑 Koda katıl{" "}
-          <span className="text-xs font-semibold">(yakında)</span>
+          🔑 Koda katıl
         </button>
 
         <button

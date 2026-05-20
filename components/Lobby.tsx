@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { thresholdSummary, type Session } from "@/lib/session";
+import { useEffect, useState } from "react";
+import { thresholdSummary, type Participant, type Session } from "@/lib/session";
+import { listParticipants, subscribeTable } from "@/lib/db";
 
 export function Lobby({
   session,
@@ -13,6 +14,21 @@ export function Lobby({
   onFetchCards: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [participants, setParticipants] = useState<Participant[]>(
+    session.participants
+  );
+
+  // Realtime: biri katılınca liste canlı güncellensin.
+  useEffect(() => {
+    try {
+      const refresh = () =>
+        listParticipants(session.id).then(setParticipants).catch(() => {});
+      refresh();
+      return subscribeTable("participants", session.id, refresh);
+    } catch {
+      // Supabase env yoksa (ör. test) realtime'ı atla.
+    }
+  }, [session.id]);
 
   function copyCode() {
     navigator.clipboard?.writeText(session.code).then(
@@ -52,10 +68,10 @@ export function Lobby({
 
         <div className="mt-5">
           <p className="text-sm font-bold text-ink">
-            Katılımcılar ({session.participants.length})
+            Katılımcılar ({participants.length})
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {session.participants.map((p) => (
+            {participants.map((p) => (
               <span
                 key={p.userId}
                 className="rounded-full bg-brand/10 px-3 py-1.5 text-sm font-semibold text-brand"
@@ -66,7 +82,7 @@ export function Lobby({
             ))}
           </div>
           <p className="mt-2 text-xs text-ink/40">
-            Çok-cihaz katılımı + canlı liste sonraki adımda (Supabase) gelecek.
+            Arkadaşların koddan katıldıkça liste canlı güncellenir.
           </p>
         </div>
 

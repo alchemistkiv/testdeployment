@@ -1,19 +1,34 @@
 "use client";
 
-// 4. adım: kaydırma destesi. Kartları tek tek göster; sağa beğen, sola geç
-// (sürükle veya buton). Tek cihazda bu kullanıcının beğenileri toplanır.
-// Grup eşleşmesi + realtime 5. adımda (Supabase) gelecek.
+// 5. adım: kaydırma + realtime eşleşme. Sağa beğen / sola geç (sürükle + butonlar).
+// Her oy DB'ye yazılır; oylar değiştikçe eşik kontrol edilir, eşleşme kaydedilir ve
+// realtime ile tüm gruba konfetili "Eşleşme!" bildirimi gider.
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Card } from "@/lib/cards";
+import type { Session } from "@/lib/session";
 import { dragHint, dragRotation, swipeDecision } from "@/lib/swipe";
+import { matchedCardIds } from "@/lib/match";
+import {
+  castVote,
+  listParticipants,
+  loadMatches,
+  loadVotes,
+  recordMatch,
+  subscribeTable,
+} from "@/lib/db";
 import { CardFace } from "./CardFace";
+import { Confetti } from "./Confetti";
 
 export function SwipeDeck({
   cards,
+  session,
+  userId,
   onBack,
 }: {
   cards: Card[];
+  session: Session;
+  userId: string;
   onBack: () => void;
 }) {
   const [index, setIndex] = useState(0);
@@ -23,16 +38,73 @@ export function SwipeDeck({
   const [leaving, setLeaving] = useState<"like" | "pass" | null>(null);
   const startX = useRef<number | null>(null);
 
+  const [matchCard, setMatchCard] = useState<Card | null>(null);
+  const [confetti, setConfetti] = useState(false);
+  const shownMatches = useRef<Set<string>>(new Set());
+
   const done = index >= cards.length;
   const current = cards[index];
   const next = cards[index + 1];
   const hint = dragHint(dx);
 
+  // Realtime eşleşme: oylar değişince eşik kontrolü + kayıt; eşleşme gelince konfeti.
+  useEffect(() => {
+    const cleanups: Array<() => void> = [];
+    try {
+      const onVotesChange = async () => {
+        const [votes, participants] = await Promise.all([
+          loadVotes(session.id),
+          listParticipants(session.id),
+        ]);
+        const matched = matchedCardIds(
+          votes,
+          session.thresholdType,
+          participants.length,
+          session.thresholdCount
+        );
+        for (const cid of matched) await recordMatch(session.id, cid);
+      };
+
+      const onMatchesChange = async () => {
+        const ids = await loadMatches(session.id);
+        for (const id of ids) {
+          if (shownMatches.current.has(id)) continue;
+          shownMatches.current.add(id);
+          const card = cards.find((c) => c.id === id);
+          if (card) {
+            setMatchCard(card);
+            setConfetti(true);
+            window.setTimeout(() => {
+              setConfetti(false);
+              setMatchCard(null);
+            }, 4500);
+          }
+        }
+      };
+
+      // İlk açılışta mevcut eşleşmeleri "gösterildi" say (eski eşleşme tekrar patlamasın),
+      // sonra mevcut oylardan yeni eşleşme varsa kaydet.
+      loadMatches(session.id)
+        .then((ids) => ids.forEach((id) => shownMatches.current.add(id)))
+        .then(onVotesChange)
+        .catch(() => {});
+
+      cleanups.push(subscribeTable("votes", session.id, onVotesChange));
+      cleanups.push(subscribeTable("matches", session.id, onMatchesChange));
+    } catch {
+      // Supabase env yoksa realtime'ı atla.
+    }
+    return () => cleanups.forEach((fn) => fn());
+  }, [session.id, session.thresholdType, session.thresholdCount, cards]);
+
   function commit(dir: "like" | "pass") {
     if (leaving) return;
+    const card = cards[index];
     setDragging(false);
     setLeaving(dir);
-    const card = cards[index];
+    if (card) {
+      castVote(session.id, card.id, userId, dir === "like").catch(() => {});
+    }
     window.setTimeout(() => {
       if (dir === "like" && card) setLiked((l) => [...l, card]);
       setIndex((i) => i + 1);
@@ -63,20 +135,26 @@ export function SwipeDeck({
     }
   }
 
-  function restart() {
-    setIndex(0);
-    setLiked([]);
-    setDx(0);
-    setLeaving(null);
-  }
-
-  // Üstteki kartın dönüşümü.
   const tx = leaving === "like" ? 600 : leaving === "pass" ? -600 : dx;
   const rot = leaving ? (leaving === "like" ? 18 : -18) : dragRotation(dx);
   const transition = dragging ? "none" : "transform 260ms ease-out";
 
   return (
     <main className="bg-party flex min-h-dvh flex-col px-6 py-8">
+      {confetti && <Confetti />}
+      {matchCard && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 px-6">
+          <div className="animate-pop w-full max-w-sm rounded-[2rem] bg-white p-7 text-center shadow-2xl">
+            <div className="text-5xl">🎉</div>
+            <h2 className="mt-2 text-2xl font-extrabold text-brand">Eşleşme!</h2>
+            <p className="mt-1 text-lg font-bold text-ink">{matchCard.name}</p>
+            {matchCard.category && (
+              <p className="text-sm text-ink/50">{matchCard.category}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
         <div className="flex items-center justify-between">
           <button
@@ -147,12 +225,10 @@ export function SwipeDeck({
         ) : (
           <div className="mt-6 flex-1">
             <div className="rounded-[2rem] bg-white/95 p-6 shadow-2xl">
-              <h1 className="text-2xl font-extrabold text-ink">
-                Hepsi bu kadar! 🎉
-              </h1>
+              <h1 className="text-2xl font-extrabold text-ink">Kaydırma bitti! 🎉</h1>
               <p className="mt-1 text-sm text-ink/60">
-                {liked.length} mekan beğendin. Grup eşleşmesi sonraki adımda
-                (canlı) gelecek.
+                {liked.length} mekan beğendin. Grubun beğenileri eşiğe ulaşınca
+                otomatik "Eşleşme!" bildirimi düşer.
               </p>
               <div className="mt-4 space-y-2">
                 {liked.length === 0 && (
@@ -173,14 +249,8 @@ export function SwipeDeck({
                 ))}
               </div>
               <button
-                onClick={restart}
-                className="mt-6 w-full rounded-2xl bg-gradient-to-r from-brand to-brand-2 py-3.5 text-base font-bold text-white shadow-lg shadow-brand/30 transition active:scale-[0.97]"
-              >
-                Baştan kaydır
-              </button>
-              <button
                 onClick={onBack}
-                className="mt-3 w-full text-sm font-semibold text-ink/40 hover:underline"
+                className="mt-6 w-full rounded-2xl bg-gradient-to-r from-brand to-brand-2 py-3.5 text-base font-bold text-white shadow-lg shadow-brand/30 transition active:scale-[0.97]"
               >
                 Lobiye dön
               </button>

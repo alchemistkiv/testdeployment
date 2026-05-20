@@ -12,7 +12,7 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 | 2 | Ana ekran + oturum kurma + eşik seçimi | ✅ Bitti |
 | 3 | Kart üretimi (DeepSeek + OpenStreetMap) | ✅ Çalışıyor (foto kısıtı: aşağıya bak) |
 | 4 | Kaydırma (swipe) UI | ✅ Çalışıyor (jest tarayıcıda doğrulanmalı) |
-| 5 | Eşleşme + realtime + konfeti | 🔧 Temel hazır; Supabase projesi bekleniyor |
+| 5 | Eşleşme + realtime + konfeti | ✅ Veri+realtime doğrulandı (UI tarayıcıda denenmeli) |
 
 ## Adım 1 — İskelet + kimlik ✅
 
@@ -20,16 +20,21 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 - İsim girme ekranı (`components/NameScreen.tsx`).
 - Kimlik: isim + gizli `uuid`, `localStorage`'da (`lib/identity.ts`). Auth yok.
 
-## Adım 5 — Eşleşme + realtime + konfeti 🔧
+## Adım 5 — Eşleşme + realtime + konfeti ✅
 
-- **Hazır (test edilebilir):** Eşleşme mantığı `lib/match.ts` (kart başına benzersiz
-  beğeni sayar, eşiğe ulaşanları bulur) + testleri. Konfeti `components/Confetti.tsx`
-  (bağımlılıksız). DB şeması `supabase/schema.sql`.
-- **Bekleyen (Supabase gerekiyor):** Oturum/oy/eşleşmeyi localStorage yerine
-  Supabase'e taşımak, koda katılma akışı, realtime "match!" aboneliği, eşleşmede
-  konfeti. Bunlar canlı Supabase ile test edilecek.
-- **Senden:** ücretsiz Supabase projesi (kart istemez) → `schema.sql`'i çalıştır →
-  `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`'i `.env.local`'a koy.
+- **Çok-cihaz oturum (Supabase):** Oturum/katılımcı/kart/oy/eşleşme artık DB'de
+  (`lib/db.ts`). Cihazda yalnızca `sessionId` işaretçisi tutulur (`lib/sessionStore.ts`).
+- **Koda katıl** akışı açıldı (`components/JoinSession.tsx`, HomeHub butonu); lobide
+  katılımcı listesi **realtime** güncelleniyor.
+- **Paylaşımlı deste:** Kartlar bir kez üretilip DB'ye yazılır; herkes aynı desteyi
+  görür (`Cards.tsx` → `loadCards`/`saveCards`).
+- **Eşleşme + konfeti:** Her oy DB'ye yazılır; oylar değiştikçe eşik kontrol edilir
+  (`lib/match.ts`), eşleşen kart `matches`'e kaydedilir ve realtime ile tüm gruba
+  konfetili "Eşleşme!" bildirimi gider (`SwipeDeck` + `Confetti`).
+- **Şema:** `supabase/schema.sql` (Management API ile uygulandı). RLS v1'de açık.
+- **Doğrulama:** Veri akışı + realtime, canlı Supabase'e karşı script ile test edildi
+  (oturum→2 kişi→kart→ikisi beğenir→eşleşme→realtime event = PASS). **Tarayıcı UI'ı
+  (swipe jesti, konfeti animasyonu, çok sekme) gerçek tarayıcıda/Vercel'de denenmeli.**
 
 ## Adım 4 — Kaydırma (swipe) UI ✅
 

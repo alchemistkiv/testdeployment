@@ -1,19 +1,23 @@
 "use client";
 
-// Oturum konusundan kartları getirir (DeepSeek → OSM) ve kaydırma destesine verir.
+// Oturum kartlarını DB'den yükler; deste boşsa konudan üretip (DeepSeek → OSM)
+// DB'ye kaydeder, sonra kaydırma destesine verir. Kartlar paylaşımlı: herkes aynı deste.
 
 import { useEffect, useState } from "react";
 import type { Session } from "@/lib/session";
 import type { Card } from "@/lib/cards";
+import { loadCards, saveCards } from "@/lib/db";
 import { SwipeDeck } from "./SwipeDeck";
 
 type Status = "loading" | "ready" | "error";
 
 export function Cards({
   session,
+  userId,
   onBack,
 }: {
   session: Session;
+  userId: string;
   onBack: () => void;
 }) {
   const [status, setStatus] = useState<Status>("loading");
@@ -22,32 +26,37 @@ export function Cards({
 
   useEffect(() => {
     let cancelled = false;
-    setStatus("loading");
-    fetch("/api/cards", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic: session.topic }),
-    })
-      .then(async (r) => {
-        const data = await r.json().catch(() => ({}));
-        if (cancelled) return;
-        if (!r.ok) {
-          setError(data.error ?? "Kartlar getirilemedi.");
-          setStatus("error");
-          return;
+
+    async function run() {
+      setStatus("loading");
+      try {
+        let existing = await loadCards(session.id);
+        if (existing.length === 0) {
+          const res = await fetch("/api/cards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic: session.topic }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error ?? "Kartlar getirilemedi.");
+          await saveCards(session.id, data.cards ?? []);
+          existing = await loadCards(session.id);
         }
-        setCards(Array.isArray(data.cards) ? data.cards : []);
-        setStatus("ready");
-      })
-      .catch(() => {
         if (cancelled) return;
-        setError("Bağlantı hatası.");
+        setCards(existing);
+        setStatus("ready");
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : "Bağlantı hatası.");
         setStatus("error");
-      });
+      }
+    }
+
+    run();
     return () => {
       cancelled = true;
     };
-  }, [session.topic]);
+  }, [session.id, session.topic]);
 
   if (status === "loading") {
     return (
@@ -79,5 +88,7 @@ export function Cards({
     );
   }
 
-  return <SwipeDeck cards={cards} onBack={onBack} />;
+  return (
+    <SwipeDeck cards={cards} session={session} userId={userId} onBack={onBack} />
+  );
 }
