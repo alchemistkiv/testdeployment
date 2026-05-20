@@ -67,7 +67,8 @@ const likes = new Set(votes.filter((v) => v.liked && v.card_id === cardId).map((
 ok(likes.size === 2, "iki beğeni sayıldı");
 
 await a.from("matches").upsert({ session_id: s.id, card_id: cardId }, { onConflict: "session_id,card_id", ignoreDuplicates: true });
-await new Promise((r) => setTimeout(r, 4000));
+// Event'i sabit beklemek yerine gelene kadar (en çok ~12s) yokla.
+for (let i = 0; i < 24 && !got; i++) await new Promise((r) => setTimeout(r, 500));
 ok(got?.card_id === cardId, "realtime eşleşme event'i alındı");
 
 await a.removeChannel(ch);
@@ -81,18 +82,24 @@ await a.from("sessions").delete().eq("id", s.id);
 const { data: gone } = await a.from("sessions").select("id").eq("id", s.id);
 ok(gone?.length === 0, "temizlik (cascade delete)");
 
-// prod endpoint
-try {
-  const res = await fetch(PROD + "/api/cards", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topic: "Ubudda kahve" }),
-  });
-  const data = await res.json();
-  ok(res.ok && Array.isArray(data.cards) && data.cards.length > 0, `prod /api/cards (${data.cards?.length ?? 0} kart)`);
-} catch (e) {
-  ok(false, "prod /api/cards erişimi: " + e.message);
+// prod endpoint — OSM ara sıra timeout verebildiği için birkaç kez dene.
+let prodCards = 0;
+let prodErr = "";
+for (let i = 0; i < 3 && prodCards === 0; i++) {
+  try {
+    const res = await fetch(PROD + "/api/cards", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ topic: "Ubudda kahve" }),
+    });
+    const data = await res.json();
+    if (res.ok && Array.isArray(data.cards)) prodCards = data.cards.length;
+    else prodErr = data.error ?? `HTTP ${res.status}`;
+  } catch (e) {
+    prodErr = e.message;
+  }
 }
+ok(prodCards > 0, `prod /api/cards (${prodCards} kart)${prodCards ? "" : " - " + prodErr}`);
 
 console.log(failed ? "\nSONUÇ: FAIL" : "\nSONUÇ: PASS");
 process.exit(failed ? 1 : 0);

@@ -37,8 +37,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B15: Lobi kart hazır durumu — kart varsa buton "Kaydırmaya başla (N kart)".
 - [x] B16: Eşik "count" altında bilgi notu — katılımcıdan fazlası seçilse de eşleşme
       katılımcı sayısıyla sınırlıdır.
-- [ ] B17: smoke.mjs dayanıklılığı — realtime bekleme süresini artır + prod fetch'i
-      birkaç kez dene (ara sıra flaky FAIL'i gider).
+- [x] B17: smoke.mjs dayanıklılığı — realtime event'i ~12s'ye kadar yokla + prod
+      fetch 3 deneme. (3/3 PASS)
 - [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
 - [x] B8: README — ürün, mimari akış, kurulum, komutlar, deploy.
 - [x] B9: OSM dayanıklılık — runOverpass'a istek başına abort (20s) + 2 tur retry;
@@ -46,6 +46,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B17: smoke harness dayanıklılaştırıldı (realtime poll + prod 3 deneme); 3/3 PASS.
+  App değişmedi → redeploy yok.
 - B16: CreateSession "count" eşiğinde bilgi notu. Smoke ara sıra flaky (realtime
   zamanlama) → B17 eklendi. Prod deploy.
 - B15: lobi butonu kart varsa "Kaydırmaya başla (N kart)" gösterir. Prod deploy.
