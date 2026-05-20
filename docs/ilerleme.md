@@ -35,7 +35,10 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B14: Katılımcı ilerlemesi — "N/M kişi kaydırmayı bitirdi" lobide canlı
       (finishedUserIds, saf+test).
 - [x] B15: Lobi kart hazır durumu — kart varsa buton "Kaydırmaya başla (N kart)".
-- [ ] B16: Eşik "count" seçiminde üst sınırı katılımcı sayısına göre bilgilendir.
+- [x] B16: Eşik "count" altında bilgi notu — katılımcıdan fazlası seçilse de eşleşme
+      katılımcı sayısıyla sınırlıdır.
+- [ ] B17: smoke.mjs dayanıklılığı — realtime bekleme süresini artır + prod fetch'i
+      birkaç kez dene (ara sıra flaky FAIL'i gider).
 - [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
 - [x] B8: README — ürün, mimari akış, kurulum, komutlar, deploy.
 - [x] B9: OSM dayanıklılık — runOverpass'a istek başına abort (20s) + 2 tur retry;
@@ -43,6 +46,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B16: CreateSession "count" eşiğinde bilgi notu. Smoke ara sıra flaky (realtime
+  zamanlama) → B17 eklendi. Prod deploy.
 - B15: lobi butonu kart varsa "Kaydırmaya başla (N kart)" gösterir. Prod deploy.
 - B14: lobide "N/M kişi kaydırmayı bitirdi" (finishedUserIds saf+test, votes aboneliği).
   B15–B16 eklendi. Prod deploy.

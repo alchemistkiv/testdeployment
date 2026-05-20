@@ -107,6 +107,13 @@ export function CreateSession({
           </div>
         )}
 
+        {thresholdType === "count" && (
+          <p className="mt-2 text-center text-xs text-ink/45">
+            Katılımcıdan fazlasını seçsen de eşleşme en çok katılımcı sayısı kadar
+            beğeniye göre olur.
+          </p>
+        )}
+
         <button
           disabled={!topicValid}
           onClick={() =>
