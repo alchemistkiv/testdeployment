@@ -46,6 +46,9 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- Cila + canlı doğrulama: markalı app/icon.svg eklendi (prod /icon.svg = 200).
+  Ayrıca prod JS bundle'ında doğru Supabase URL gömülü olduğu doğrulandı → canlı
+  realtime/DB gerçekten doğru projeye bağlı.
 - Kalite: SwipeDeck keydown listener bir kez bağlanıyor (commitRef ile); her
   kaydırmada add/remove churn'ü giderildi + done iken arrow no-op. Prod deploy.
 - Test kapsamı: HomeHub (isim + create/join/reset callback'leri) — 66/66. Test-only.
