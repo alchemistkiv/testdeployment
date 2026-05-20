@@ -25,6 +25,7 @@ export function Cards({
   const [cards, setCards] = useState<Card[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +61,7 @@ export function Cards({
     return () => {
       cancelled = true;
     };
-  }, [session.id, session.topic, userId]);
+  }, [session.id, session.topic, userId, reloadKey]);
 
   if (status === "loading") {
     return (
@@ -90,9 +91,21 @@ export function Cards({
         <div className="w-full max-w-md rounded-2xl bg-white/95 p-6 text-center shadow-2xl">
           <p className="text-base font-bold text-ink">{title}</p>
           <p className="mt-1 text-sm text-ink/60">{desc}</p>
+          {!allSwiped && (
+            <button
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="mt-5 w-full rounded-2xl bg-gradient-to-r from-brand to-brand-2 py-3 text-base font-bold text-white shadow-lg shadow-brand/30 transition active:scale-[0.97]"
+            >
+              Tekrar dene
+            </button>
+          )}
           <button
             onClick={onBack}
-            className="mt-5 w-full rounded-2xl bg-gradient-to-r from-brand to-brand-2 py-3 text-base font-bold text-white shadow-lg shadow-brand/30 transition active:scale-[0.97]"
+            className={`w-full rounded-2xl py-3 text-base font-bold transition active:scale-[0.97] ${
+              allSwiped
+                ? "mt-5 bg-gradient-to-r from-brand to-brand-2 text-white shadow-lg shadow-brand/30"
+                : "mt-3 text-ink/50 hover:underline"
+            }`}
           >
             Lobiye dön
           </button>

@@ -30,7 +30,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç + ipucu; butonlarda
       aria. (tarayıcıda denenmeli)
 - [x] B11: Lobide "eşleşme için N beğeni gerekiyor" (requiredVotes, katılımcıya göre canlı).
-- [ ] B12: Cards hata durumunda "tekrar dene" butonu (yeniden üretim).
+- [x] B12: Cards hata/boş durumunda "tekrar dene" (reloadKey ile yeniden üretim).
 - [ ] B13: Eşleşme bannerında "Haritada aç" (OSM) linki.
 - [ ] B14: Katılımcı bazlı ilerleme — kaç kişi destesini bitirdi (canlı).
 - [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
@@ -40,6 +40,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B12: Cards hata/boş ekranında "tekrar dene" (reloadKey effect'i yeniden tetikler).
+  Prod deploy.
 - B11: lobide "eşleşme için N beğeni gerekiyor" (requiredVotes, canlı). Prod deploy.
 - B6: SwipeDeck klavye desteği (← geç / → beğen) + ipucu. Backlog B1–B10 bitti;
   B11–B14 eklendi. Prod deploy.
