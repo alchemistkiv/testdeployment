@@ -8,7 +8,14 @@ import {
   type Session,
 } from "@/lib/session";
 import type { Card } from "@/lib/cards";
-import { listParticipants, loadCards, loadMatches, subscribeTable } from "@/lib/db";
+import {
+  listParticipants,
+  loadCards,
+  loadMatches,
+  loadVotes,
+  subscribeTable,
+} from "@/lib/db";
+import { finishedUserIds } from "@/lib/match";
 
 export function Lobby({
   session,
@@ -24,6 +31,7 @@ export function Lobby({
     session.participants
   );
   const [matched, setMatched] = useState<Card[]>([]);
+  const [finished, setFinished] = useState(0);
 
   // Realtime: biri katılınca liste canlı güncellensin.
   useEffect(() => {
@@ -46,6 +54,22 @@ export function Lobby({
     try {
       refresh();
       return subscribeTable("matches", session.id, refresh);
+    } catch {
+      // env yoksa atla
+    }
+  }, [session.id]);
+
+  // Realtime: kaç kişi destesini bitirdi (tüm kartları oyladı).
+  useEffect(() => {
+    const refresh = () =>
+      Promise.all([loadVotes(session.id), loadCards(session.id)])
+        .then(([votes, cards]) =>
+          setFinished(finishedUserIds(votes, cards.length).length)
+        )
+        .catch(() => {});
+    try {
+      refresh();
+      return subscribeTable("votes", session.id, refresh);
     } catch {
       // env yoksa atla
     }
@@ -111,6 +135,11 @@ export function Lobby({
               </span>
             ))}
           </div>
+          {finished > 0 && (
+            <p className="mt-2 text-xs font-semibold text-mint">
+              🃏 {finished}/{participants.length} kişi kaydırmayı bitirdi
+            </p>
+          )}
           <p className="mt-2 text-xs text-ink/40">
             Arkadaşların koddan katıldıkça liste canlı güncellenir.
           </p>

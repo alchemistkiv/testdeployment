@@ -32,7 +32,10 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B11: Lobide "eşleşme için N beğeni gerekiyor" (requiredVotes, katılımcıya göre canlı).
 - [x] B12: Cards hata/boş durumunda "tekrar dene" (reloadKey ile yeniden üretim).
 - [x] B13: Eşleşme bannerında "Haritada aç" linki (mapsSearchUrl, saf+test).
-- [ ] B14: Katılımcı bazlı ilerleme — kaç kişi destesini bitirdi (canlı).
+- [x] B14: Katılımcı ilerlemesi — "N/M kişi kaydırmayı bitirdi" lobide canlı
+      (finishedUserIds, saf+test).
+- [ ] B15: Kart üretilirken lobide "kartlar hazırlanıyor" göstergesi (cards tablosu boşken).
+- [ ] B16: Eşik "count" seçiminde üst sınırı katılımcı sayısına göre bilgilendir.
 - [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
 - [x] B8: README — ürün, mimari akış, kurulum, komutlar, deploy.
 - [x] B9: OSM dayanıklılık — runOverpass'a istek başına abort (20s) + 2 tur retry;
@@ -40,6 +43,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B14: lobide "N/M kişi kaydırmayı bitirdi" (finishedUserIds saf+test, votes aboneliği).
+  B15–B16 eklendi. Prod deploy.
 - B13: eşleşme bannerına "Haritada aç" (mapsSearchUrl saf yardımcı + test). Prod deploy.
   (Not: smoke ilk koşuda realtime zamanlamasından FAIL, tekrar PASS.)
 - B12: Cards hata/boş ekranında "tekrar dene" (reloadKey effect'i yeniden tetikler).

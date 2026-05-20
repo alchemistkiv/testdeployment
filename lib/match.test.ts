@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   filterUnvoted,
+  finishedUserIds,
   likeCountsByCard,
   matchedCardIds,
   type Vote,
@@ -37,6 +38,20 @@ describe("filterUnvoted", () => {
   });
   it("oy yoksa hepsi kalır", () => {
     expect(filterUnvoted(cards, [], "u1")).toHaveLength(3);
+  });
+});
+
+describe("finishedUserIds", () => {
+  it("tüm kartları oylayan kullanıcıyı bitirmiş sayar", () => {
+    const v: Vote[] = [
+      { userId: "u1", cardId: "a", liked: true },
+      { userId: "u1", cardId: "b", liked: false },
+      { userId: "u2", cardId: "a", liked: true },
+    ];
+    expect(finishedUserIds(v, 2).sort()).toEqual(["u1"]);
+  });
+  it("totalCards 0 ise boş", () => {
+    expect(finishedUserIds([], 0)).toEqual([]);
   });
 });
 

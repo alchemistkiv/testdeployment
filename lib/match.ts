@@ -35,6 +35,14 @@ export function filterUnvoted<T extends { id: string }>(
   return items.filter((i) => !voted.has(i.id));
 }
 
+/** Destedeki tüm kartları oylamış (kaydırmayı bitirmiş) kullanıcıların id'leri. */
+export function finishedUserIds(votes: Vote[], totalCards: number): string[] {
+  if (totalCards <= 0) return [];
+  const perUser: Record<string, Set<string>> = {};
+  for (const v of votes) (perUser[v.userId] ??= new Set()).add(v.cardId);
+  return Object.keys(perUser).filter((u) => perUser[u].size >= totalCards);
+}
+
 /** Eşiğe ulaşan kartların id'leri (beğeni sayısına göre azalan sırada). */
 export function matchedCardIds(
   votes: Vote[],
