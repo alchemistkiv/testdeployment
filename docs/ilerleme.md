@@ -10,7 +10,7 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 |---|---|---|
 | 1 | İskelet + kimlik (isim + uuid, localStorage) | ✅ Bitti |
 | 2 | Ana ekran + oturum kurma + eşik seçimi | ✅ Bitti |
-| 3 | Kart üretimi (Claude + Foursquare) | ⏳ Sırada |
+| 3 | Kart üretimi (DeepSeek + Foursquare) | 🔧 Kodu hazır; geçerli Foursquare key bekleniyor |
 | 4 | Kaydırma UI | ⬜ Bekliyor |
 | 5 | Eşleşme + realtime + konfeti | ⬜ Bekliyor |
 
@@ -19,6 +19,21 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 - Tailwind v4 + Poppins ile eğlenceli, mobil-öncelikli tema (`app/globals.css`, `app/layout.tsx`).
 - İsim girme ekranı (`components/NameScreen.tsx`).
 - Kimlik: isim + gizli `uuid`, `localStorage`'da (`lib/identity.ts`). Auth yok.
+
+## Adım 3 — Kart üretimi 🔧
+
+- **Beyin DeepSeek'e geçti** (Claude yerine): `deepseek-chat` (= `deepseek-v4-flash`),
+  OpenAI-uyumlu API. Serbest cümleden konum + arama anahtarı + fiyat/açıklık/sıralama
+  ayıklar (`lib/intent.ts`). Canlı test edildi, doğru çalışıyor.
+- **Gözler Foursquare** (`lib/foursquare.ts`): yeni Places API
+  (`places-api.foursquare.com`, `X-Places-Api-Version: 2025-06-17`, Bearer Service Key).
+  Legacy v3 kapatıldı (410). Ham mekan → Card dönüşümü saf ve test edilmiş (`lib/cards.ts`).
+- API route `POST /api/cards` (`app/api/cards/route.ts`): cümle → DeepSeek → Foursquare →
+  kart listesi. Anahtarlar yalnızca sunucuda.
+- UI: Lobby'deki "Kartları getir" aktif; `components/Cards.tsx` foto + puan + fiyat +
+  mesafe + açık/kapalı ile kartları gösterir (kaydırma 4. adımda).
+- **Engel:** geçerli bir Foursquare **Service API Key** gerekiyor (panelde
+  "Generate Service API Key"). Eldeki key 401 veriyor.
 
 ## Adım 2 — Oturum kurma + eşik ✅
 
@@ -36,7 +51,7 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 - Çerçeve: Vitest + Testing Library (jsdom). Çalıştır: `npm test`.
 - Kapsam: oturum mantığı (kod/oy/doğrulama/özet), kimlik (kaydet/koru/sil),
   bileşen etkileşimleri (NameScreen, CreateSession eşik+sayaç, Lobby render).
-- Durum: **20/20 test geçiyor**, `npm run build` temiz.
+- Durum: **28/28 test geçiyor**, `npm run build` temiz.
 
 ## Bilinen sınırlar / sonraki işler
 

@@ -6,9 +6,11 @@ import { thresholdSummary, type Session } from "@/lib/session";
 export function Lobby({
   session,
   onClose,
+  onFetchCards,
 }: {
   session: Session;
   onClose: () => void;
+  onFetchCards: () => void;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -69,11 +71,10 @@ export function Lobby({
         </div>
 
         <button
-          disabled
-          className="mt-6 w-full rounded-2xl border-2 border-ink/10 py-4 text-lg font-bold text-ink/40"
+          onClick={onFetchCards}
+          className="mt-6 w-full rounded-2xl bg-gradient-to-r from-brand to-brand-2 py-4 text-lg font-bold text-white shadow-lg shadow-brand/30 transition active:scale-[0.97]"
         >
-          🃏 Kartları getir{" "}
-          <span className="text-xs font-semibold">(3. adım)</span>
+          🃏 Kartları getir
         </button>
 
         <button

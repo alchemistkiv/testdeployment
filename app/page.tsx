@@ -12,6 +12,7 @@ import { NameScreen } from "@/components/NameScreen";
 import { HomeHub } from "@/components/HomeHub";
 import { CreateSession } from "@/components/CreateSession";
 import { Lobby } from "@/components/Lobby";
+import { Cards } from "@/components/Cards";
 
 type Screen = "home" | "create";
 
@@ -19,6 +20,7 @@ export default function Home() {
   const { identity, ready, save, reset } = useIdentity();
   const [session, setSession] = useState<Session | null>(null);
   const [screen, setScreen] = useState<Screen>("home");
+  const [showCards, setShowCards] = useState(false);
 
   useEffect(() => {
     if (ready) setSession(getCurrentSession());
@@ -37,12 +39,17 @@ export default function Home() {
   }
 
   if (session) {
+    if (showCards) {
+      return <Cards session={session} onBack={() => setShowCards(false)} />;
+    }
     return (
       <Lobby
         session={session}
+        onFetchCards={() => setShowCards(true)}
         onClose={() => {
           clearSession();
           setSession(null);
+          setShowCards(false);
           setScreen("home");
         }}
       />
