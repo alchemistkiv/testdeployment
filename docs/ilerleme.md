@@ -46,6 +46,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B18: layout metadata'ya Open Graph + Twitter + appleWebApp (link paylaşım
+  önizlemesi). Mevcut title/description/themeColor zaten vardı. Prod deploy.
 - B17: smoke harness dayanıklılaştırıldı (realtime poll + prod 3 deneme); 3/3 PASS.
   App değişmedi → redeploy yok.
 - B16: CreateSession "count" eşiğinde bilgi notu. Smoke ara sıra flaky (realtime

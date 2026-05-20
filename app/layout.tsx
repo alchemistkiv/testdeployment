@@ -11,6 +11,20 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Bali Choice — birlikte karar ver",
   description: "Grupça kaydır, eşleş, nereye gideceğinize birlikte karar verin.",
+  applicationName: "Bali Choice",
+  appleWebApp: { capable: true, title: "Bali Choice", statusBarStyle: "default" },
+  // Link paylaşımı (kod/oturum) sosyal önizlemede düzgün görünsün.
+  openGraph: {
+    title: "Bali Choice — birlikte karar ver",
+    description: "Grupça kaydır, eşleş, nereye gideceğinize birlikte karar verin.",
+    type: "website",
+    locale: "tr_TR",
+  },
+  twitter: {
+    card: "summary",
+    title: "Bali Choice — birlikte karar ver",
+    description: "Grupça kaydır, eşleş, nereye gideceğinize birlikte karar verin.",
+  },
 };
 
 export const viewport: Viewport = {
