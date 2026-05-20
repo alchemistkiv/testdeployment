@@ -102,19 +102,20 @@ export function SwipeDeck({
     return () => cleanups.forEach((fn) => fn());
   }, [session.id, session.thresholdType, session.thresholdCount, cards]);
 
-  // Klavye erişilebilirliği: → beğen, ← geç.
+  // Klavye erişilebilirliği: → beğen, ← geç. Dinleyiciyi bir kez bağla; güncel
+  // commit'e ref üzerinden eriş (her kaydırmada yeniden bağlanmasın).
+  const commitRef = useRef<(dir: "like" | "pass") => void>(() => {});
   useEffect(() => {
-    if (done) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") commit("like");
-      else if (e.key === "ArrowLeft") commit("pass");
+      if (e.key === "ArrowRight") commitRef.current("like");
+      else if (e.key === "ArrowLeft") commitRef.current("pass");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [done, index, leaving]);
+  }, []);
 
   function commit(dir: "like" | "pass") {
-    if (leaving) return;
+    if (leaving || index >= cards.length) return;
     const card = cards[index];
     setDragging(false);
     setLeaving(dir);
@@ -128,6 +129,8 @@ export function SwipeDeck({
       setLeaving(null);
     }, 260);
   }
+
+  commitRef.current = commit;
 
   function onPointerDown(e: React.PointerEvent) {
     if (leaving) return;
