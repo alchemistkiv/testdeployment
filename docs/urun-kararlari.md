@@ -66,8 +66,23 @@ Pratikte hobi ölçeğinde her iki yol da neredeyse bedava (öneri çağrısı k
 Next.js 15 + React 19 + TypeScript · Supabase (Postgres + realtime + auth + storage)
 · Vercel (deploy) · Foursquare Places API · Claude API / Agent SDK.
 
-## Açık sorular (sonra netleşecek)
+## 7. Çözülen kararlar
 
-- Eşleşme eşiği: herkes mi, çoğunluk mu, ilk N kişi mi?
-- Konum girişi: telefon GPS'i mi, elle yazma mı, ikisi mi?
-- Auth: anonim/oturum-bağlantısı mı, gerçek hesap mı?
+- **Eşleşme eşiği:** Oturum kurulurken seçilir — "herkes" / "çoğunluk" /
+  "ilk N kişi". Oturumu açan belirler.
+- **Konum girişi:** Serbest **semantik cümle** ("Ubud'da şu caddede sessiz bir
+  kahve"). GPS yok. Claude cümleden konum + niyet + kriterleri ayıklar, Foursquare'e
+  geçirir. Not: serbest metinle cadde düzeyi hassasiyet sınırlı; semt/bölge düzeyi
+  güvenilir.
+- **Kullanıcı kimliği:** Auth yok. Kullanıcı bir **isim** girer; isim + arka planda
+  üretilen benzersiz **uuid** `localStorage`'a yazılır. uuid kaydırmaları kişi-bazında
+  saymak için (isim çakışmalarına karşı). Cache temizlenirse kimlik sıfırlanır —
+  v1 için kabul edilebilir.
+
+## 8. Maliyet kısıtı: $0 ekstra
+
+Kullanıcı ek ödeme yapmayacak. Plan buna uygun:
+- Supabase / Vercel → ücretsiz katman, kart istemez.
+- Claude → mevcut Max 5x aboneliğinin programatik havuzu (ekstra ödeme yok).
+- Foursquare → ücretsiz katman (kart gerekip gerekmediği bağlanırken teyit edilecek;
+  gerekirse kartsız alternatife düşülür, foto kalitesi pahasına).

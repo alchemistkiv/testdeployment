@@ -22,6 +22,7 @@ Detaylı kararlar ve gerekçeler: `docs/urun-kararlari.md`.
 - **Next.js 15 (App Router) + React 19 + TypeScript** — frontend + API routes.
 - **Supabase** — Postgres veritabanı, realtime (eşleşme bildirimi), auth, storage.
 - **Vercel** — deploy.
+- **Kimlik:** Auth yok; kullanıcı ismi + üretilen uuid `localStorage`'da tutulur.
 - **Foursquare Places API** — konuma göre gerçek mekanları fotoğraf + bilgiyle çeker
   (kartların "gözü"; gerçek fotoğraf kaynağı).
 - **Claude API / Agent SDK** — orkestratör/"beyin": kullanıcının isteğini anlar,
