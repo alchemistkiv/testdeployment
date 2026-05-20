@@ -54,23 +54,36 @@ export async function createSessionDb(input: {
   host: Participant;
 }): Promise<Session> {
   const sb = getSupabase();
-  const { data: s, error } = await sb
-    .from("sessions")
-    .insert({
-      code: generateJoinCode(),
-      topic: input.topic.trim(),
-      threshold_type: input.thresholdType,
-      threshold_count: input.thresholdType === "count" ? input.thresholdCount : null,
-      host_user_id: input.host.userId,
-    })
-    .select()
-    .single();
-  if (error) throw error;
+  const base = {
+    topic: input.topic.trim(),
+    threshold_type: input.thresholdType,
+    threshold_count: input.thresholdType === "count" ? input.thresholdCount : null,
+    host_user_id: input.host.userId,
+  };
+
+  // Join kodu benzersiz olmalı; nadir çakışmada (Postgres 23505) yeni kodla dene.
+  let created: SessionRow | null = null;
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data: s, error } = await sb
+      .from("sessions")
+      .insert({ ...base, code: generateJoinCode() })
+      .select()
+      .single();
+    if (!error) {
+      created = s as SessionRow;
+      break;
+    }
+    lastError = error;
+    if ((error as { code?: string }).code !== "23505") break;
+  }
+  if (!created) throw lastError;
+
   const { error: pErr } = await sb
     .from("participants")
-    .insert({ session_id: s.id, user_id: input.host.userId, name: input.host.name });
+    .insert({ session_id: created.id, user_id: input.host.userId, name: input.host.name });
   if (pErr) throw pErr;
-  return rowToSession(s as SessionRow, [input.host]);
+  return rowToSession(created, [input.host]);
 }
 
 export async function joinSessionDb(

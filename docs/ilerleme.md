@@ -12,7 +12,7 @@ listeyi güncelle. Aşırı mühendislik/dolgu iş YOK. UI işlerinde "tarayıc�
 denenmeli" notu düş (headless ortamda jest/animasyon test edilemez).
 
 Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
-- [ ] B1: `createSessionDb` join-kodu çakışmasında retry (benzersizlik garantisi).
+- [x] B1: `createSessionDb` join-kodu çakışmasında retry (benzersizlik garantisi).
 - [ ] B2: Resume-aware deste — kullanıcının önceden oyladığı kartları atla (saf
       yardımcı + test). UI: hepsi oylanmışsa "zaten kaydırdın" durumu.
 - [ ] B3: "Eşleşmeler" görünümü — grubun eşleştiği kartları listele (loadMatches +
@@ -26,6 +26,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
 
 Loop günlüğü (en yeni üstte):
+- B1: createSessionDb join-kodu çakışmasında 23505'te yeni kodla retry (5 deneme).
 - (başlangıç) v1 5/5 adım bitti; loop başlatıldı.
 
 ## Durum özeti
