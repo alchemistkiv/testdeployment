@@ -21,8 +21,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B1: `createSessionDb` join-kodu çakışmasında retry (benzersizlik garantisi).
 - [x] B2: Resume-aware deste — kullanıcının önceden oyladığı kartları atla (saf
       yardımcı + test). UI: hepsi oylanmışsa "zaten kaydırdın" durumu (tarayıcıda denenmeli).
-- [ ] B3: "Eşleşmeler" görünümü — grubun eşleştiği kartları listele (loadMatches +
-      kartlar). Deck sonu + lobi.
+- [x] B3: "Eşleşmeler" görünümü — lobide grubun eşleştiği kartlar canlı listelenir
+      (loadMatches + loadCards + realtime). (tarayıcıda denenmeli)
 - [ ] B4: Oy ilerlemesi göstergesi — kart başına kaç kişi beğendi (canlı).
 - [ ] B5: Oturumdan ayrılma / katılımcı kaydını silme.
 - [ ] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç; aria etiketleri.
@@ -32,6 +32,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
 
 Loop günlüğü (en yeni üstte):
+- Heartbeat 30dk → 10dk'ya alındı.
+- B3: lobide "Eşleşmeler" bölümü — grup eşleşmeleri realtime listelenir. Prod deploy.
 - B2: resume-aware deste — `filterUnvoted` (saf+test); Cards oyladığın kartları atlar,
   hepsi bitince "tüm kartları kaydırdın" durumu. Prod yeniden deploy.
 - Deploy: Vercel prod yayında (https://testdeployment-two.vercel.app); env'ler set.

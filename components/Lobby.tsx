@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { thresholdSummary, type Participant, type Session } from "@/lib/session";
-import { listParticipants, subscribeTable } from "@/lib/db";
+import type { Card } from "@/lib/cards";
+import { listParticipants, loadCards, loadMatches, subscribeTable } from "@/lib/db";
 
 export function Lobby({
   session,
@@ -17,6 +18,7 @@ export function Lobby({
   const [participants, setParticipants] = useState<Participant[]>(
     session.participants
   );
+  const [matched, setMatched] = useState<Card[]>([]);
 
   // Realtime: biri katılınca liste canlı güncellensin.
   useEffect(() => {
@@ -27,6 +29,20 @@ export function Lobby({
       return subscribeTable("participants", session.id, refresh);
     } catch {
       // Supabase env yoksa (ör. test) realtime'ı atla.
+    }
+  }, [session.id]);
+
+  // Realtime: grup bir kartta eşleşince lobide canlı görünsün.
+  useEffect(() => {
+    const refresh = () =>
+      Promise.all([loadMatches(session.id), loadCards(session.id)])
+        .then(([ids, cards]) => setMatched(cards.filter((c) => ids.includes(c.id))))
+        .catch(() => {});
+    try {
+      refresh();
+      return subscribeTable("matches", session.id, refresh);
+    } catch {
+      // env yoksa atla
     }
   }, [session.id]);
 
@@ -85,6 +101,22 @@ export function Lobby({
             Arkadaşların koddan katıldıkça liste canlı güncellenir.
           </p>
         </div>
+
+        {matched.length > 0 && (
+          <div className="mt-5 rounded-2xl bg-mint/10 p-4">
+            <p className="text-sm font-bold text-mint">Eşleşmeler 🎉</p>
+            <div className="mt-2 space-y-1.5">
+              {matched.map((c) => (
+                <div key={c.id} className="flex items-center gap-2">
+                  <span className="font-bold text-ink">{c.name}</span>
+                  {c.category && (
+                    <span className="text-xs text-ink/50">{c.category}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <button
           onClick={onFetchCards}
