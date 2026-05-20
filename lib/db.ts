@@ -108,6 +108,18 @@ export async function joinSessionDb(
   return rowToSession(s as SessionRow, await listParticipants(s.id));
 }
 
+export async function leaveSessionDb(
+  sessionId: string,
+  userId: string
+): Promise<void> {
+  const sb = getSupabase();
+  await sb
+    .from("participants")
+    .delete()
+    .eq("session_id", sessionId)
+    .eq("user_id", userId);
+}
+
 export async function loadSession(sessionId: string): Promise<Session | null> {
   const sb = getSupabase();
   const { data: s } = await sb

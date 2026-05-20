@@ -25,7 +25,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
       (loadMatches + loadCards + realtime). (tarayıcıda denenmeli)
 - [x] B4: Oy ilerlemesi göstergesi — güncel kartta "n/N kişi beğendi" canlı
       (likeCountsByCard + votes aboneliği). (tarayıcıda denenmeli)
-- [ ] B5: Oturumdan ayrılma / katılımcı kaydını silme.
+- [x] B5: Oturumdan ayrılma — `leaveSessionDb` katılımcıyı siler; lobi listesi
+      herkes için canlı düşer. Smoke'a ayrılma kontrolü eklendi.
 - [ ] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç; aria etiketleri.
 - [ ] B7: `lib/db` map fonksiyonlarını saf yardımcılara ayır + birim test.
 - [ ] B8: README / kurulum + mimari özeti.
@@ -33,6 +34,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
 
 Loop günlüğü (en yeni üstte):
+- B5: oturumdan ayrılınca katılımcı DB'den silinir (leaveSessionDb); smoke'a
+  ayrılma kontrolü. Gözlem: prod /api/cards ara sıra boş (OSM timeout) → sıradaki B9.
 - B4: SwipeDeck güncel kartta canlı "n/N kişi beğendi" göstergesi. Prod deploy.
 - Heartbeat 30dk → 10dk'ya alındı.
 - B3: lobide "Eşleşmeler" bölümü — grup eşleşmeleri realtime listelenir. Prod deploy.

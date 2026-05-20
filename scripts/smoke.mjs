@@ -71,6 +71,12 @@ await new Promise((r) => setTimeout(r, 4000));
 ok(got?.card_id === cardId, "realtime eşleşme event'i alındı");
 
 await a.removeChannel(ch);
+
+// ayrılma: katılımcı silinince liste düşer
+await b.from("participants").delete().eq("session_id", s.id).eq("user_id", "u2");
+const { data: afterLeave } = await a.from("participants").select("user_id").eq("session_id", s.id);
+ok(afterLeave?.length === 1, "ayrılma sonrası katılımcı düştü");
+
 await a.from("sessions").delete().eq("id", s.id);
 const { data: gone } = await a.from("sessions").select("id").eq("id", s.id);
 ok(gone?.length === 0, "temizlik (cascade delete)");

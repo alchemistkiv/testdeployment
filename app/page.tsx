@@ -7,7 +7,12 @@ import {
   getStoredSessionId,
   rememberSession,
 } from "@/lib/sessionStore";
-import { createSessionDb, joinSessionDb, loadSession } from "@/lib/db";
+import {
+  createSessionDb,
+  joinSessionDb,
+  leaveSessionDb,
+  loadSession,
+} from "@/lib/db";
 import type { Session } from "@/lib/session";
 import { NameScreen } from "@/components/NameScreen";
 import { HomeHub } from "@/components/HomeHub";
@@ -73,6 +78,7 @@ export default function Home() {
         session={session}
         onFetchCards={() => setShowCards(true)}
         onClose={() => {
+          leaveSessionDb(session.id, identity.userId).catch(() => {});
           clearStoredSession();
           setSession(null);
           setShowCards(false);
