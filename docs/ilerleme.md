@@ -6,10 +6,16 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 
 ## Otonom loop — backlog & ilerleme
 
-Loop kuralları: her tur **tek, sınırlı, doğrulanabilir** bir iş yap → `npm test` +
-`npm run build` → commit/push (`claude/deployment-options-research-1HWAB`) → bu
-listeyi güncelle. Aşırı mühendislik/dolgu iş YOK. UI işlerinde "tarayıcıda
+Loop kuralları: her tur **tek, sınırlı, doğrulanabilir** bir iş yap → **kapsamlı
+test**: `npm test` + `npm run build` + **canlı testler** (`scripts/smoke.mjs` =
+Supabase create/join/kart/oy/eşleşme/realtime; ayrıca prod `/api/cards`) → tüm
+uygulamayı baştan doğrula → commit/push (`claude/deployment-options-research-1HWAB`)
+→ bu listeyi güncelle. Aşırı mühendislik/dolgu iş YOK. UI işlerinde "tarayıcıda
 denenmeli" notu düş (headless ortamda jest/animasyon test edilemez).
+
+Canlı / Deploy:
+- Prod URL: https://testdeployment-two.vercel.app (Vercel, `alchemistkivs-projects`).
+- Smoke (her loop): `node scripts/smoke.mjs` → PASS beklenir.
 
 Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B1: `createSessionDb` join-kodu çakışmasında retry (benzersizlik garantisi).
@@ -26,6 +32,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
 
 Loop günlüğü (en yeni üstte):
+- Deploy: Vercel prod yayında (https://testdeployment-two.vercel.app); env'ler set.
+  scripts/smoke.mjs eklendi (canlı tam akış + realtime + prod) → PASS.
 - B1: createSessionDb join-kodu çakışmasında 23505'te yeni kodla retry (5 deneme).
 - (başlangıç) v1 5/5 adım bitti; loop başlatıldı.
 
