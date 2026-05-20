@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>İlk Deployment'ım</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <h1>Bu site canlı! 🚀</h1>
+    <p>GitHub'a push ettim, internette yayınlandı. İşte deployment bu.</p>
+
+    <button id="btn">Tıkla</button>
+    <p id="count">Henüz tıklamadın.</p>
+
+    <section class="info">
+      <h2>Burada ne oldu?</h2>
+      <ol>
+        <li><code>git push</code> ile kodu GitHub'a gönderdim.</li>
+        <li>GitHub Actions otomatik tetiklendi (<code>.github/workflows/deploy.yml</code>).</li>
+        <li>Dosyalar GitHub Pages CDN'ine kopyalandı.</li>
+        <li>Site bir URL'de yayına çıktı.</li>
+      </ol>
+      <p>Aynı mantık Vercel, Netlify, Cloudflare'de de geçerli — sadece arayüz değişir.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
