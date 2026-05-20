@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Card } from "@/lib/cards";
 import type { Session } from "@/lib/session";
 import { dragHint, dragRotation, swipeDecision } from "@/lib/swipe";
-import { matchedCardIds } from "@/lib/match";
+import { likeCountsByCard, matchedCardIds } from "@/lib/match";
 import {
   castVote,
   listParticipants,
@@ -41,6 +41,8 @@ export function SwipeDeck({
   const [matchCard, setMatchCard] = useState<Card | null>(null);
   const [confetti, setConfetti] = useState(false);
   const shownMatches = useRef<Set<string>>(new Set());
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [partCount, setPartCount] = useState(0);
 
   const done = index >= cards.length;
   const current = cards[index];
@@ -56,6 +58,8 @@ export function SwipeDeck({
           loadVotes(session.id),
           listParticipants(session.id),
         ]);
+        setLikeCounts(likeCountsByCard(votes));
+        setPartCount(participants.length);
         const matched = matchedCardIds(
           votes,
           session.thresholdType,
@@ -172,7 +176,12 @@ export function SwipeDeck({
 
         {!done ? (
           <>
-            <div className="relative mt-4 flex-1">
+            <p className="mt-2 h-5 text-center text-sm font-semibold text-white/90">
+              {current && partCount > 0 && likeCounts[current.id] > 0
+                ? `❤️ Bu kartı ${likeCounts[current.id]}/${partCount} kişi beğendi`
+                : ""}
+            </p>
+            <div className="relative mt-2 flex-1">
               {next && (
                 <div className="absolute inset-0 scale-[0.96] opacity-60">
                   <CardFace card={next} />

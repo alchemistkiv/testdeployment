@@ -23,7 +23,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
       yardımcı + test). UI: hepsi oylanmışsa "zaten kaydırdın" durumu (tarayıcıda denenmeli).
 - [x] B3: "Eşleşmeler" görünümü — lobide grubun eşleştiği kartlar canlı listelenir
       (loadMatches + loadCards + realtime). (tarayıcıda denenmeli)
-- [ ] B4: Oy ilerlemesi göstergesi — kart başına kaç kişi beğendi (canlı).
+- [x] B4: Oy ilerlemesi göstergesi — güncel kartta "n/N kişi beğendi" canlı
+      (likeCountsByCard + votes aboneliği). (tarayıcıda denenmeli)
 - [ ] B5: Oturumdan ayrılma / katılımcı kaydını silme.
 - [ ] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç; aria etiketleri.
 - [ ] B7: `lib/db` map fonksiyonlarını saf yardımcılara ayır + birim test.
@@ -32,6 +33,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
 
 Loop günlüğü (en yeni üstte):
+- B4: SwipeDeck güncel kartta canlı "n/N kişi beğendi" göstergesi. Prod deploy.
 - Heartbeat 30dk → 10dk'ya alındı.
 - B3: lobide "Eşleşmeler" bölümü — grup eşleşmeleri realtime listelenir. Prod deploy.
 - B2: resume-aware deste — `filterUnvoted` (saf+test); Cards oyladığın kartları atlar,
