@@ -1,97 +1,56 @@
-:root {
-  --bg: #0f172a;
-  --card: #1e293b;
-  --accent: #38bdf8;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
+@import "tailwindcss";
+
+/* Eğlenceli, modern tema. Tailwind v4 @theme ile renk/utility üretiyoruz. */
+@theme {
+  --font-sans: var(--font-poppins), system-ui, -apple-system, sans-serif;
+
+  --color-brand: #ff4d6d;
+  --color-brand-2: #ff8c42;
+  --color-grape: #6c5ce7;
+  --color-mint: #2ec4b6;
+  --color-ink: #1a1430;
+  --color-cream: #fff7f2;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pop: pop 0.35s ease-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(3deg); }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  justify-content: center;
-  padding: 2rem 1rem;
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
 }
 
-main {
-  width: 100%;
-  max-width: 560px;
-}
-
-h1 {
-  font-size: 1.6rem;
-}
-
-.sub {
-  color: var(--muted);
-  margin-top: -0.6rem;
-  margin-bottom: 1.5rem;
-}
-
-form {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-input {
-  flex: 1;
-  padding: 0.7rem 0.9rem;
-  border-radius: 8px;
-  border: 1px solid #334155;
-  background: var(--card);
-  color: var(--text);
-  font-size: 1rem;
-}
-
-button {
-  background: var(--accent);
-  color: #0f172a;
-  border: none;
-  padding: 0.7rem 1.2rem;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-li {
-  background: var(--card);
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
-}
-
-li time {
-  display: block;
-  color: var(--muted);
-  font-size: 0.8rem;
-  margin-top: 0.3rem;
-}
-
-.empty {
-  color: var(--muted);
-}
-
-.error {
-  color: #f87171;
+/* Canlı, hareketli arka plan gradyanı */
+.bg-party {
+  background: linear-gradient(120deg, #ff4d6d, #ff8c42, #6c5ce7, #2ec4b6);
+  background-size: 300% 300%;
+  animation: gradient-shift 14s ease infinite;
 }
