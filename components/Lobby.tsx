@@ -32,6 +32,7 @@ export function Lobby({
   );
   const [matched, setMatched] = useState<Card[]>([]);
   const [finished, setFinished] = useState(0);
+  const [cardCount, setCardCount] = useState(0);
 
   // Realtime: biri katılınca liste canlı güncellensin.
   useEffect(() => {
@@ -63,9 +64,10 @@ export function Lobby({
   useEffect(() => {
     const refresh = () =>
       Promise.all([loadVotes(session.id), loadCards(session.id)])
-        .then(([votes, cards]) =>
-          setFinished(finishedUserIds(votes, cards.length).length)
-        )
+        .then(([votes, cards]) => {
+          setCardCount(cards.length);
+          setFinished(finishedUserIds(votes, cards.length).length);
+        })
         .catch(() => {});
     try {
       refresh();
@@ -165,7 +167,9 @@ export function Lobby({
           onClick={onFetchCards}
           className="mt-6 w-full rounded-2xl bg-gradient-to-r from-brand to-brand-2 py-4 text-lg font-bold text-white shadow-lg shadow-brand/30 transition active:scale-[0.97]"
         >
-          🃏 Kartları getir
+          {cardCount > 0
+            ? `🃏 Kaydırmaya başla (${cardCount} kart)`
+            : "🃏 Kartları getir"}
         </button>
 
         <button

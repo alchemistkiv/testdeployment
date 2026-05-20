@@ -34,7 +34,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B13: Eşleşme bannerında "Haritada aç" linki (mapsSearchUrl, saf+test).
 - [x] B14: Katılımcı ilerlemesi — "N/M kişi kaydırmayı bitirdi" lobide canlı
       (finishedUserIds, saf+test).
-- [ ] B15: Kart üretilirken lobide "kartlar hazırlanıyor" göstergesi (cards tablosu boşken).
+- [x] B15: Lobi kart hazır durumu — kart varsa buton "Kaydırmaya başla (N kart)".
 - [ ] B16: Eşik "count" seçiminde üst sınırı katılımcı sayısına göre bilgilendir.
 - [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
 - [x] B8: README — ürün, mimari akış, kurulum, komutlar, deploy.
@@ -43,6 +43,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B15: lobi butonu kart varsa "Kaydırmaya başla (N kart)" gösterir. Prod deploy.
 - B14: lobide "N/M kişi kaydırmayı bitirdi" (finishedUserIds saf+test, votes aboneliği).
   B15–B16 eklendi. Prod deploy.
 - B13: eşleşme bannerına "Haritada aç" (mapsSearchUrl saf yardımcı + test). Prod deploy.
