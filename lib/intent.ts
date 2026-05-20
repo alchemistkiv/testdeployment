@@ -1,26 +1,17 @@
-// DeepSeek "beyin": kullanıcının serbest cümlesinden (TR/EN) Foursquare için
-// yapılandırılmış arama isteği ayıklar. Yalnızca sunucu — anahtar gizli.
+// DeepSeek "beyin": kullanıcının serbest cümlesinden (TR/EN) OpenStreetMap
+// arama parametreleri ayıklar. Yalnızca sunucu — anahtar gizli.
 
-import type { PlaceQuery, SortMode } from "./cards";
+import type { PlaceQuery } from "./cards";
 
 const API_URL = "https://api.deepseek.com/chat/completions";
 const MODEL = "deepseek-chat"; // şu an deepseek-v4-flash'a çözümleniyor
 
-const SYSTEM_PROMPT = `You convert a free-text request (Turkish or English) into a venue search query for the Foursquare Places API.
+const SYSTEM_PROMPT = `You convert a free-text request (Turkish or English) into parameters for an OpenStreetMap venue search.
 Return ONLY a JSON object with these keys:
-- "near": string — a place name Foursquare can geocode (neighborhood/city/area mentioned in the text).
-- "query": string — SHORT English search keywords for the venue type (e.g. "coffee", "dinner restaurant", "rooftop bar", "brunch").
-- "openNow": boolean — true only if the user implies they want places open right now.
-- "minPrice": integer 1-4 or null.
-- "maxPrice": integer 1-4 or null (e.g. "cheap" -> 2, "not too expensive" -> 2, "fancy" -> null/4).
-- "sort": one of "RELEVANCE","RATING","DISTANCE","POPULARITY" (default "RELEVANCE"; use "RATING" if user wants good/best/highly-rated).
-Infer sensibly; use null/false when a constraint is not mentioned. Output JSON only, no prose.`;
-
-const VALID_SORTS: SortMode[] = ["RELEVANCE", "RATING", "DISTANCE", "POPULARITY"];
-
-function clampPrice(v: unknown): number | null {
-  return typeof v === "number" && v >= 1 && v <= 4 ? Math.round(v) : null;
-}
+- "near": string — a place name a geocoder can resolve (the neighborhood/city/area mentioned).
+- "kinds": array of strings — pick from EXACTLY this set: "cafe","restaurant","bar","pub","fast_food","ice_cream","biergarten". Map: coffee/tea -> "cafe"; dinner/lunch/meal/food -> "restaurant"; drinks/cocktails -> "bar" (and "pub"); burgers/quick bite -> "fast_food". Include 1-2 most relevant kinds.
+- "keywords": array of SHORT lowercase english keywords for cuisine/vibe (e.g. ["vegan"], ["rooftop"], ["seafood"], ["coffee"]). Use [] if none implied.
+Output JSON only, no prose.`;
 
 export async function parseTopic(topic: string): Promise<PlaceQuery> {
   const key = process.env.DEEPSEEK_API_KEY;
@@ -62,23 +53,14 @@ export async function parseTopic(topic: string): Promise<PlaceQuery> {
   }
 
   const near = typeof parsed.near === "string" ? parsed.near.trim() : "";
-  const query =
-    typeof parsed.query === "string" && parsed.query.trim()
-      ? parsed.query.trim()
-      : topic.trim();
-  const sort =
-    typeof parsed.sort === "string" && VALID_SORTS.includes(parsed.sort as SortMode)
-      ? (parsed.sort as SortMode)
-      : "RELEVANCE";
-
   if (!near) throw new Error("İstekten bir konum çıkaramadım — cümleye yer ekle.");
 
-  return {
-    near,
-    query,
-    openNow: parsed.openNow === true,
-    minPrice: clampPrice(parsed.minPrice),
-    maxPrice: clampPrice(parsed.maxPrice),
-    sort,
-  };
+  const kinds = Array.isArray(parsed.kinds)
+    ? parsed.kinds.filter((k): k is string => typeof k === "string")
+    : [];
+  const keywords = Array.isArray(parsed.keywords)
+    ? parsed.keywords.filter((k): k is string => typeof k === "string")
+    : [];
+
+  return { near, kinds, keywords };
 }

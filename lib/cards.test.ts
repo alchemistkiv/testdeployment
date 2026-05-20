@@ -1,22 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
-  fsqPlaceToCard,
   formatDistance,
-  photoUrlFromParts,
+  haversineMeters,
+  osmAddress,
+  osmCategory,
+  osmElementToCard,
+  osmPhoto,
   priceLabel,
 } from "./cards";
-
-describe("photoUrlFromParts", () => {
-  it("birleştirir prefix + boyut + suffix", () => {
-    expect(photoUrlFromParts("https://x/img/", "/a.jpg", "400x400")).toBe(
-      "https://x/img/400x400/a.jpg"
-    );
-  });
-  it("parça eksikse null", () => {
-    expect(photoUrlFromParts(null, "/a.jpg")).toBeNull();
-    expect(photoUrlFromParts("https://x/", null)).toBeNull();
-  });
-});
 
 describe("priceLabel", () => {
   it("1–4 → $ işaretleri", () => {
@@ -41,38 +32,105 @@ describe("formatDistance", () => {
   });
 });
 
-describe("fsqPlaceToCard", () => {
-  it("ham Foursquare mekanını Card'a çevirir", () => {
-    const card = fsqPlaceToCard({
-      fsq_place_id: "abc123",
-      name: "Seniman Coffee",
-      location: { formatted_address: "Jl. Sriwedari, Ubud" },
-      categories: [{ name: "Coffee Shop" }],
-      rating: 8.7,
-      price: 2,
-      distance: 540,
-      hours: { open_now: true },
-      photos: [{ prefix: "https://fastly.4sqi.net/img/general/", suffix: "/x.jpg" }],
-    });
-    expect(card).toEqual({
-      fsqId: "abc123",
-      name: "Seniman Coffee",
-      category: "Coffee Shop",
-      photoUrl: "https://fastly.4sqi.net/img/general/600x600/x.jpg",
-      rating: 8.7,
-      priceLevel: 2,
-      distanceMeters: 540,
-      address: "Jl. Sriwedari, Ubud",
-      openNow: true,
-    });
+describe("haversineMeters", () => {
+  it("yakın iki nokta arası makul mesafe verir", () => {
+    const d = haversineMeters(-8.5069, 115.2625, -8.5067323, 115.2651985);
+    expect(d).toBeGreaterThan(250);
+    expect(d).toBeLessThan(350);
   });
+  it("aynı nokta → 0", () => {
+    expect(haversineMeters(40, 29, 40, 29)).toBeCloseTo(0, 5);
+  });
+});
 
-  it("eksik alanlarda null'a düşer ve fsq_id fallback'i çalışır", () => {
-    const card = fsqPlaceToCard({ fsq_id: "legacy1", name: "X" });
-    expect(card.fsqId).toBe("legacy1");
+describe("osmCategory", () => {
+  it("mutfak öncelikli ve okunur", () => {
+    expect(osmCategory({ cuisine: "coffee_shop;breakfast" })).toBe("Coffee shop");
+  });
+  it("mutfak yoksa amenity etiketi (TR)", () => {
+    expect(osmCategory({ amenity: "restaurant" })).toBe("Restoran");
+    expect(osmCategory({ amenity: "cafe" })).toBe("Kafe");
+  });
+  it("hiçbiri yoksa null", () => {
+    expect(osmCategory({})).toBeNull();
+  });
+});
+
+describe("osmAddress", () => {
+  it("sokak + numara + şehir birleştirir", () => {
+    expect(
+      osmAddress({
+        "addr:street": "Jalan Sri Wedari",
+        "addr:housenumber": "5",
+        "addr:city": "Ubud",
+      })
+    ).toBe("Jalan Sri Wedari 5, Ubud");
+  });
+  it("eksikse elde olanı / null verir", () => {
+    expect(osmAddress({ "addr:city": "Ubud" })).toBe("Ubud");
+    expect(osmAddress({})).toBeNull();
+  });
+});
+
+describe("osmPhoto", () => {
+  it("doğrudan image URL'i", () => {
+    expect(osmPhoto({ image: "https://x/p.jpg" })).toBe("https://x/p.jpg");
+  });
+  it("wikimedia_commons → FilePath URL'i", () => {
+    expect(osmPhoto({ wikimedia_commons: "File:Foo bar.jpg" })).toBe(
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Foo%20bar.jpg?width=600"
+    );
+  });
+  it("foto yoksa null", () => {
+    expect(osmPhoto({})).toBeNull();
+    expect(osmPhoto({ image: "not-a-url" })).toBeNull();
+  });
+});
+
+describe("osmElementToCard", () => {
+  const center = { lat: -8.5069, lon: 115.2625 };
+
+  it("node etiketlerini Card'a çevirir + mesafe hesaplar", () => {
+    const card = osmElementToCard(
+      {
+        type: "node",
+        id: 1726069192,
+        lat: -8.5067323,
+        lon: 115.2651985,
+        tags: {
+          name: "Seniman Coffee Studio",
+          amenity: "cafe",
+          cuisine: "coffee_shop",
+          "addr:street": "Jalan Sri Wedari",
+          "addr:housenumber": "5",
+          "addr:city": "Ubud",
+        },
+      },
+      center
+    );
+    expect(card.id).toBe("node/1726069192");
+    expect(card.name).toBe("Seniman Coffee Studio");
+    expect(card.category).toBe("Coffee shop");
+    expect(card.address).toBe("Jalan Sri Wedari 5, Ubud");
     expect(card.photoUrl).toBeNull();
     expect(card.rating).toBeNull();
+    expect(card.priceLevel).toBeNull();
     expect(card.openNow).toBeNull();
-    expect(card.category).toBeNull();
+    expect(card.distanceMeters).toBeGreaterThan(250);
+    expect(card.distanceMeters).toBeLessThan(350);
+  });
+
+  it("way için center koordinatını kullanır", () => {
+    const card = osmElementToCard(
+      {
+        type: "way",
+        id: 42,
+        center: { lat: -8.5069, lon: 115.2625 },
+        tags: { name: "Some Resto", amenity: "restaurant" },
+      },
+      center
+    );
+    expect(card.id).toBe("way/42");
+    expect(card.distanceMeters).toBe(0);
   });
 });

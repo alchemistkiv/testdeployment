@@ -88,7 +88,7 @@ export function Cards({
         {status === "ready" && cards.length > 0 && (
           <div className="mt-5 space-y-4">
             {cards.map((c) => (
-              <CardItem key={c.fsqId || c.name} card={c} />
+              <CardItem key={c.id || c.name} card={c} />
             ))}
           </div>
         )}

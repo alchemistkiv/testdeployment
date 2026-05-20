@@ -5,7 +5,7 @@
 import { NextResponse } from "next/server";
 import { validateTopic } from "@/lib/session";
 import { parseTopic } from "@/lib/intent";
-import { searchPlaces } from "@/lib/foursquare";
+import { searchPlaces } from "@/lib/osm";
 
 export async function POST(req: Request) {
   let topic = "";

@@ -10,7 +10,7 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 |---|---|---|
 | 1 | İskelet + kimlik (isim + uuid, localStorage) | ✅ Bitti |
 | 2 | Ana ekran + oturum kurma + eşik seçimi | ✅ Bitti |
-| 3 | Kart üretimi (DeepSeek + Foursquare) | 🔧 Kodu hazır; geçerli Foursquare key bekleniyor |
+| 3 | Kart üretimi (DeepSeek + OpenStreetMap) | ✅ Çalışıyor (foto kısıtı: aşağıya bak) |
 | 4 | Kaydırma UI | ⬜ Bekliyor |
 | 5 | Eşleşme + realtime + konfeti | ⬜ Bekliyor |
 
@@ -20,20 +20,23 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 - İsim girme ekranı (`components/NameScreen.tsx`).
 - Kimlik: isim + gizli `uuid`, `localStorage`'da (`lib/identity.ts`). Auth yok.
 
-## Adım 3 — Kart üretimi 🔧
+## Adım 3 — Kart üretimi ✅ (foto kısıtlı)
 
-- **Beyin DeepSeek'e geçti** (Claude yerine): `deepseek-chat` (= `deepseek-v4-flash`),
-  OpenAI-uyumlu API. Serbest cümleden konum + arama anahtarı + fiyat/açıklık/sıralama
-  ayıklar (`lib/intent.ts`). Canlı test edildi, doğru çalışıyor.
-- **Gözler Foursquare** (`lib/foursquare.ts`): yeni Places API
-  (`places-api.foursquare.com`, `X-Places-Api-Version: 2025-06-17`, Bearer Service Key).
-  Legacy v3 kapatıldı (410). Ham mekan → Card dönüşümü saf ve test edilmiş (`lib/cards.ts`).
-- API route `POST /api/cards` (`app/api/cards/route.ts`): cümle → DeepSeek → Foursquare →
-  kart listesi. Anahtarlar yalnızca sunucuda.
-- UI: Lobby'deki "Kartları getir" aktif; `components/Cards.tsx` foto + puan + fiyat +
-  mesafe + açık/kapalı ile kartları gösterir (kaydırma 4. adımda).
-- **Engel:** geçerli bir Foursquare **Service API Key** gerekiyor (panelde
-  "Generate Service API Key"). Eldeki key 401 veriyor.
+- **Beyin DeepSeek** (Claude yerine): `deepseek-chat` (= `deepseek-v4-flash`),
+  OpenAI-uyumlu API. Serbest cümleden `near` + OSM `kinds` + `keywords` ayıklar
+  (`lib/intent.ts`). Canlı doğrulandı.
+- **Gözler OpenStreetMap** (`lib/osm.ts`): Nominatim ile yer adı → koordinat,
+  Overpass ile çevredeki mekanlar. **Anahtar/kart/kayıt gerekmez, $0.** Foursquare'den
+  vazgeçildi (ücretsiz tier'ı bile kart/billing istiyordu — 429).
+- Ham OSM element → Card dönüşümü saf ve test edilmiş (`lib/cards.ts`): isim, kategori
+  (mutfak), adres, mesafe (haversine). Foto/puan/fiyat OSM'de genelde yok → null.
+- API route `POST /api/cards`: cümle → DeepSeek → OSM → kart listesi. Anahtar (DeepSeek)
+  yalnızca sunucuda.
+- UI: Lobby "Kartları getir" aktif; `components/Cards.tsx` kartları gösterir (foto
+  varsa foto, yoksa şık placeholder). Kaydırma 4. adımda.
+- **Bilinen kısıt:** OSM'de mekan fotoğrafı neredeyse hiç yok (Ubud testinde 15/15
+  fotosuz). "Fotoğrafa kaydır" hissi için ileride foto kaynağı (kart-gerektiren
+  Foursquare/Google ya da foto zenginleştirme) gerekecek — kullanıcı $0/kartsızı seçti.
 
 ## Adım 2 — Oturum kurma + eşik ✅
 
