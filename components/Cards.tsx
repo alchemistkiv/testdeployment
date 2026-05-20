@@ -6,7 +6,8 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@/lib/session";
 import type { Card } from "@/lib/cards";
-import { loadCards, saveCards } from "@/lib/db";
+import { loadCards, loadVotes, saveCards } from "@/lib/db";
+import { filterUnvoted } from "@/lib/match";
 import { SwipeDeck } from "./SwipeDeck";
 
 type Status = "loading" | "ready" | "error";
@@ -22,6 +23,7 @@ export function Cards({
 }) {
   const [status, setStatus] = useState<Status>("loading");
   const [cards, setCards] = useState<Card[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -42,8 +44,10 @@ export function Cards({
           await saveCards(session.id, data.cards ?? []);
           existing = await loadCards(session.id);
         }
+        const votes = await loadVotes(session.id);
         if (cancelled) return;
-        setCards(existing);
+        setTotalCount(existing.length);
+        setCards(filterUnvoted(existing, votes, userId));
         setStatus("ready");
       } catch (e) {
         if (cancelled) return;
@@ -56,7 +60,7 @@ export function Cards({
     return () => {
       cancelled = true;
     };
-  }, [session.id, session.topic]);
+  }, [session.id, session.topic, userId]);
 
   if (status === "loading") {
     return (
@@ -68,15 +72,24 @@ export function Cards({
   }
 
   if (status === "error" || cards.length === 0) {
+    const allSwiped = status !== "error" && totalCount > 0;
+    const title =
+      status === "error"
+        ? "Bir şeyler ters gitti 😕"
+        : allSwiped
+          ? "Tüm kartları kaydırdın ✅"
+          : "Hiç kart bulunamadı 🤔";
+    const desc =
+      status === "error"
+        ? error
+        : allSwiped
+          ? "Grubun beğenileri eşiğe ulaşınca eşleşme bildirimi düşer."
+          : "Cümleyi biraz değiştirip tekrar dener misin?";
     return (
       <main className="bg-party flex min-h-dvh flex-col items-center justify-center px-6">
         <div className="w-full max-w-md rounded-2xl bg-white/95 p-6 text-center shadow-2xl">
-          <p className="text-base font-bold text-ink">
-            {status === "error" ? "Bir şeyler ters gitti 😕" : "Hiç kart bulunamadı 🤔"}
-          </p>
-          <p className="mt-1 text-sm text-ink/60">
-            {status === "error" ? error : "Cümleyi biraz değiştirip tekrar dener misin?"}
-          </p>
+          <p className="text-base font-bold text-ink">{title}</p>
+          <p className="mt-1 text-sm text-ink/60">{desc}</p>
           <button
             onClick={onBack}
             className="mt-5 w-full rounded-2xl bg-gradient-to-r from-brand to-brand-2 py-3 text-base font-bold text-white shadow-lg shadow-brand/30 transition active:scale-[0.97]"

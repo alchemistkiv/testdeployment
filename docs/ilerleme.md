@@ -19,8 +19,8 @@ Canlı / Deploy:
 
 Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B1: `createSessionDb` join-kodu çakışmasında retry (benzersizlik garantisi).
-- [ ] B2: Resume-aware deste — kullanıcının önceden oyladığı kartları atla (saf
-      yardımcı + test). UI: hepsi oylanmışsa "zaten kaydırdın" durumu.
+- [x] B2: Resume-aware deste — kullanıcının önceden oyladığı kartları atla (saf
+      yardımcı + test). UI: hepsi oylanmışsa "zaten kaydırdın" durumu (tarayıcıda denenmeli).
 - [ ] B3: "Eşleşmeler" görünümü — grubun eşleştiği kartları listele (loadMatches +
       kartlar). Deck sonu + lobi.
 - [ ] B4: Oy ilerlemesi göstergesi — kart başına kaç kişi beğendi (canlı).
@@ -32,6 +32,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
 
 Loop günlüğü (en yeni üstte):
+- B2: resume-aware deste — `filterUnvoted` (saf+test); Cards oyladığın kartları atlar,
+  hepsi bitince "tüm kartları kaydırdın" durumu. Prod yeniden deploy.
 - Deploy: Vercel prod yayında (https://testdeployment-two.vercel.app); env'ler set.
   scripts/smoke.mjs eklendi (canlı tam akış + realtime + prod) → PASS.
 - B1: createSessionDb join-kodu çakışmasında 23505'te yeni kodla retry (5 deneme).

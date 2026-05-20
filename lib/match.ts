@@ -23,6 +23,18 @@ export function likeCountsByCard(votes: Vote[]): Record<string, number> {
   return counts;
 }
 
+/** Bu kullanıcının zaten oyladığı kartları çıkarır (kaldığı yerden devam). */
+export function filterUnvoted<T extends { id: string }>(
+  items: T[],
+  votes: Vote[],
+  userId: string
+): T[] {
+  const voted = new Set(
+    votes.filter((v) => v.userId === userId).map((v) => v.cardId)
+  );
+  return items.filter((i) => !voted.has(i.id));
+}
+
 /** Eşiğe ulaşan kartların id'leri (beğeni sayısına göre azalan sırada). */
 export function matchedCardIds(
   votes: Vote[],

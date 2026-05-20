@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { likeCountsByCard, matchedCardIds, type Vote } from "./match";
+import {
+  filterUnvoted,
+  likeCountsByCard,
+  matchedCardIds,
+  type Vote,
+} from "./match";
 
 const votes: Vote[] = [
   { userId: "u1", cardId: "a", liked: true },
@@ -17,6 +22,21 @@ describe("likeCountsByCard", () => {
   });
   it("boş girişte boş", () => {
     expect(likeCountsByCard([])).toEqual({});
+  });
+});
+
+describe("filterUnvoted", () => {
+  const cards = [{ id: "a" }, { id: "b" }, { id: "c" }];
+  it("kullanıcının oyladığı kartları çıkarır", () => {
+    const v: Vote[] = [
+      { userId: "u1", cardId: "a", liked: true },
+      { userId: "u1", cardId: "b", liked: false },
+      { userId: "u2", cardId: "c", liked: true }, // başka kullanıcı sayılmaz
+    ];
+    expect(filterUnvoted(cards, v, "u1").map((c) => c.id)).toEqual(["c"]);
+  });
+  it("oy yoksa hepsi kalır", () => {
+    expect(filterUnvoted(cards, [], "u1")).toHaveLength(3);
   });
 });
 
