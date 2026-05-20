@@ -4,6 +4,30 @@ Bali Choice — grupça kaydır, eşleş, birlikte karar ver. Her adımın durum
 
 Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 
+## Otonom loop — backlog & ilerleme
+
+Loop kuralları: her tur **tek, sınırlı, doğrulanabilir** bir iş yap → `npm test` +
+`npm run build` → commit/push (`claude/deployment-options-research-1HWAB`) → bu
+listeyi güncelle. Aşırı mühendislik/dolgu iş YOK. UI işlerinde "tarayıcıda
+denenmeli" notu düş (headless ortamda jest/animasyon test edilemez).
+
+Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
+- [ ] B1: `createSessionDb` join-kodu çakışmasında retry (benzersizlik garantisi).
+- [ ] B2: Resume-aware deste — kullanıcının önceden oyladığı kartları atla (saf
+      yardımcı + test). UI: hepsi oylanmışsa "zaten kaydırdın" durumu.
+- [ ] B3: "Eşleşmeler" görünümü — grubun eşleştiği kartları listele (loadMatches +
+      kartlar). Deck sonu + lobi.
+- [ ] B4: Oy ilerlemesi göstergesi — kart başına kaç kişi beğendi (canlı).
+- [ ] B5: Oturumdan ayrılma / katılımcı kaydını silme.
+- [ ] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç; aria etiketleri.
+- [ ] B7: `lib/db` map fonksiyonlarını saf yardımcılara ayır + birim test.
+- [ ] B8: README / kurulum + mimari özeti.
+- [ ] B9: Kart üretimi başarısızsa "tekrar dene" + kısmi sonuç toleransı.
+- [ ] B10: Boş/az kart durumunda yarıçapı genişletip yeniden arama (OSM).
+
+Loop günlüğü (en yeni üstte):
+- (başlangıç) v1 5/5 adım bitti; loop başlatıldı.
+
 ## Durum özeti
 
 | Adım | Açıklama | Durum |
