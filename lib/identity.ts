@@ -7,7 +7,7 @@ export type Identity = {
   userId: string;
 };
 
-const STORAGE_KEY = "yalla:identity";
+const STORAGE_KEY = "balichoice:identity";
 
 function readStorage(): Identity | null {
   if (typeof window === "undefined") return null;

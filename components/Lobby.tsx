@@ -1,0 +1,88 @@
+"use client";
+
+import { useState } from "react";
+import { thresholdSummary, type Session } from "@/lib/session";
+
+export function Lobby({
+  session,
+  onClose,
+}: {
+  session: Session;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  function copyCode() {
+    navigator.clipboard?.writeText(session.code).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      },
+      () => {}
+    );
+  }
+
+  return (
+    <main className="bg-party flex min-h-dvh flex-col items-center justify-center px-6 py-10">
+      <div className="w-full max-w-md animate-pop rounded-[2rem] bg-white/95 p-7 shadow-2xl">
+        <p className="text-xs font-bold uppercase tracking-wider text-brand">
+          Oturum hazır 🎉
+        </p>
+        <h1 className="mt-1 text-2xl font-extrabold leading-tight text-ink">
+          “{session.topic}”
+        </h1>
+        <p className="mt-2 inline-block rounded-full bg-grape/10 px-3 py-1 text-sm font-semibold text-grape">
+          {thresholdSummary(session.thresholdType, session.thresholdCount)}
+        </p>
+
+        <div className="mt-6 rounded-2xl bg-cream p-5 text-center">
+          <p className="text-sm font-semibold text-ink/60">Katılım kodu</p>
+          <button
+            onClick={copyCode}
+            className="mt-1 text-4xl font-extrabold tracking-[0.3em] text-ink transition active:scale-95"
+          >
+            {session.code}
+          </button>
+          <p className="mt-1 text-xs font-semibold text-mint">
+            {copied ? "Kopyalandı! ✓" : "Dokunup kopyala, arkadaşlarına gönder"}
+          </p>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-sm font-bold text-ink">
+            Katılımcılar ({session.participants.length})
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {session.participants.map((p) => (
+              <span
+                key={p.userId}
+                className="rounded-full bg-brand/10 px-3 py-1.5 text-sm font-semibold text-brand"
+              >
+                {p.name}
+                {p.userId === session.hostUserId && " 👑"}
+              </span>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-ink/40">
+            Çok-cihaz katılımı + canlı liste sonraki adımda (Supabase) gelecek.
+          </p>
+        </div>
+
+        <button
+          disabled
+          className="mt-6 w-full rounded-2xl border-2 border-ink/10 py-4 text-lg font-bold text-ink/40"
+        >
+          🃏 Kartları getir{" "}
+          <span className="text-xs font-semibold">(3. adım)</span>
+        </button>
+
+        <button
+          onClick={onClose}
+          className="mt-4 w-full text-sm font-semibold text-ink/40 underline-offset-4 hover:underline"
+        >
+          Oturumu kapat
+        </button>
+      </div>
+    </main>
+  );
+}

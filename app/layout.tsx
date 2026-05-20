@@ -9,7 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Yalla — birlikte karar ver",
+  title: "Bali Choice — birlikte karar ver",
   description: "Grupça kaydır, eşleş, nereye gideceğinize birlikte karar verin.",
 };
 
