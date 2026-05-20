@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { thresholdSummary, type Participant, type Session } from "@/lib/session";
+import {
+  requiredVotes,
+  thresholdSummary,
+  type Participant,
+  type Session,
+} from "@/lib/session";
 import type { Card } from "@/lib/cards";
 import { listParticipants, loadCards, loadMatches, subscribeTable } from "@/lib/db";
 
@@ -67,6 +72,15 @@ export function Lobby({
         </h1>
         <p className="mt-2 inline-block rounded-full bg-grape/10 px-3 py-1 text-sm font-semibold text-grape">
           {thresholdSummary(session.thresholdType, session.thresholdCount)}
+        </p>
+        <p className="mt-1.5 text-xs font-semibold text-ink/50">
+          Eşleşme için{" "}
+          {requiredVotes(
+            session.thresholdType,
+            participants.length,
+            session.thresholdCount
+          )}{" "}
+          beğeni gerekiyor ({participants.length} kişiye göre)
         </p>
 
         <div className="mt-6 rounded-2xl bg-cream p-5 text-center">

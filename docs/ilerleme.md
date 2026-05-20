@@ -29,7 +29,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
       herkes için canlı düşer. Smoke'a ayrılma kontrolü eklendi.
 - [x] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç + ipucu; butonlarda
       aria. (tarayıcıda denenmeli)
-- [ ] B11: Lobide "eşleşme için kaç beğeni gerekiyor" bilgisini göster (requiredVotes).
+- [x] B11: Lobide "eşleşme için N beğeni gerekiyor" (requiredVotes, katılımcıya göre canlı).
 - [ ] B12: Cards hata durumunda "tekrar dene" butonu (yeniden üretim).
 - [ ] B13: Eşleşme bannerında "Haritada aç" (OSM) linki.
 - [ ] B14: Katılımcı bazlı ilerleme — kaç kişi destesini bitirdi (canlı).
@@ -40,6 +40,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B11: lobide "eşleşme için N beğeni gerekiyor" (requiredVotes, canlı). Prod deploy.
 - B6: SwipeDeck klavye desteği (← geç / → beğen) + ipucu. Backlog B1–B10 bitti;
   B11–B14 eklendi. Prod deploy.
 - B8: README eklendi (ürün/mimari/kurulum/komut/deploy). Sadece doküman → redeploy yok.
