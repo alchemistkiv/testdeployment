@@ -46,6 +46,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- Test kapsamı: HomeHub (isim + create/join/reset callback'leri) — 66/66. Test-only.
 - Test kapsamı: JoinSession (kod doğrulama/uppercase/hata) ve CardFace (isim/kategori/
   placeholder emoji/puan-fiyat-mesafe-açık) için bileşen testleri eklendi (64/64).
   Test-only → redeploy yok.
