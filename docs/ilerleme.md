@@ -27,7 +27,12 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
       (likeCountsByCard + votes aboneliği). (tarayıcıda denenmeli)
 - [x] B5: Oturumdan ayrılma — `leaveSessionDb` katılımcıyı siler; lobi listesi
       herkes için canlı düşer. Smoke'a ayrılma kontrolü eklendi.
-- [ ] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç; aria etiketleri.
+- [x] B6: Klavye erişilebilirliği — ok tuşlarıyla beğen/geç + ipucu; butonlarda
+      aria. (tarayıcıda denenmeli)
+- [ ] B11: Lobide "eşleşme için kaç beğeni gerekiyor" bilgisini göster (requiredVotes).
+- [ ] B12: Cards hata durumunda "tekrar dene" butonu (yeniden üretim).
+- [ ] B13: Eşleşme bannerında "Haritada aç" (OSM) linki.
+- [ ] B14: Katılımcı bazlı ilerleme — kaç kişi destesini bitirdi (canlı).
 - [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
 - [x] B8: README — ürün, mimari akış, kurulum, komutlar, deploy.
 - [x] B9: OSM dayanıklılık — runOverpass'a istek başına abort (20s) + 2 tur retry;
@@ -35,6 +40,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B6: SwipeDeck klavye desteği (← geç / → beğen) + ipucu. Backlog B1–B10 bitti;
+  B11–B14 eklendi. Prod deploy.
 - B8: README eklendi (ürün/mimari/kurulum/komut/deploy). Sadece doküman → redeploy yok.
 - B7: lib/db map fonksiyonları lib/dbMap.ts'e taşındı (saf) + 4 test. Refactor,
   davranış aynı → redeploy yok. (B10, B9 içinde karşılandı olarak işaretlendi.)

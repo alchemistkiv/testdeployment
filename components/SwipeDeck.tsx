@@ -101,6 +101,17 @@ export function SwipeDeck({
     return () => cleanups.forEach((fn) => fn());
   }, [session.id, session.thresholdType, session.thresholdCount, cards]);
 
+  // Klavye erişilebilirliği: → beğen, ← geç.
+  useEffect(() => {
+    if (done) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") commit("like");
+      else if (e.key === "ArrowLeft") commit("pass");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [done, index, leaving]);
+
   function commit(dir: "like" | "pass") {
     if (leaving) return;
     const card = cards[index];
@@ -230,6 +241,9 @@ export function SwipeDeck({
                 ❤️
               </button>
             </div>
+            <p className="mt-3 text-center text-xs font-semibold text-white/60">
+              ← geç · beğen →
+            </p>
           </>
         ) : (
           <div className="mt-6 flex-1">
