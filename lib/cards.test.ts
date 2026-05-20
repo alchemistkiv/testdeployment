@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   categoryEmoji,
+  mapsSearchUrl,
   formatDistance,
   haversineMeters,
   osmAddress,
@@ -88,6 +89,18 @@ describe("osmPhoto", () => {
   it("foto yoksa null", () => {
     expect(osmPhoto({})).toBeNull();
     expect(osmPhoto({ image: "not-a-url" })).toBeNull();
+  });
+});
+
+describe("mapsSearchUrl", () => {
+  it("isim + adresten arama URL'i kurar", () => {
+    const u = mapsSearchUrl({ name: "Seniman Coffee", address: "Ubud" });
+    expect(u).toBe(
+      "https://www.google.com/maps/search/?api=1&query=Seniman%20Coffee%20Ubud"
+    );
+  });
+  it("adres yoksa sadece ismi kullanır", () => {
+    expect(mapsSearchUrl({ name: "Maha" })).toContain("query=Maha");
   });
 });
 

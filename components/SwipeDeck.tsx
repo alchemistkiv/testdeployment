@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Card } from "@/lib/cards";
 import type { Session } from "@/lib/session";
+import { mapsSearchUrl } from "@/lib/cards";
 import { dragHint, dragRotation, swipeDecision } from "@/lib/swipe";
 import { likeCountsByCard, matchedCardIds } from "@/lib/match";
 import {
@@ -166,6 +167,14 @@ export function SwipeDeck({
             {matchCard.category && (
               <p className="text-sm text-ink/50">{matchCard.category}</p>
             )}
+            <a
+              href={mapsSearchUrl(matchCard)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block rounded-2xl bg-grape px-5 py-2.5 text-sm font-bold text-white transition active:scale-95"
+            >
+              Haritada aç ↗
+            </a>
           </div>
         </div>
       )}

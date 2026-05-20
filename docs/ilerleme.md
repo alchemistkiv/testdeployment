@@ -31,7 +31,7 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
       aria. (tarayıcıda denenmeli)
 - [x] B11: Lobide "eşleşme için N beğeni gerekiyor" (requiredVotes, katılımcıya göre canlı).
 - [x] B12: Cards hata/boş durumunda "tekrar dene" (reloadKey ile yeniden üretim).
-- [ ] B13: Eşleşme bannerında "Haritada aç" (OSM) linki.
+- [x] B13: Eşleşme bannerında "Haritada aç" linki (mapsSearchUrl, saf+test).
 - [ ] B14: Katılımcı bazlı ilerleme — kaç kişi destesini bitirdi (canlı).
 - [x] B7: `lib/db` map fonksiyonları `lib/dbMap.ts`'e ayrıldı (saf) + birim test.
 - [x] B8: README — ürün, mimari akış, kurulum, komutlar, deploy.
@@ -40,6 +40,8 @@ Backlog (öncelik sırası, doğrulanabilirlik gözeterek):
 - [x] B10: Boş sonuçta yarıçap genişletme — B9 içinde karşılandı.
 
 Loop günlüğü (en yeni üstte):
+- B13: eşleşme bannerına "Haritada aç" (mapsSearchUrl saf yardımcı + test). Prod deploy.
+  (Not: smoke ilk koşuda realtime zamanlamasından FAIL, tekrar PASS.)
 - B12: Cards hata/boş ekranında "tekrar dene" (reloadKey effect'i yeniden tetikler).
   Prod deploy.
 - B11: lobide "eşleşme için N beğeni gerekiyor" (requiredVotes, canlı). Prod deploy.

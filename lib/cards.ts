@@ -122,6 +122,15 @@ export function osmPhoto(tags: Record<string, any>): string | null {
   return null;
 }
 
+/** Mekanı haritada açmak için arama URL'i (isim + adres). */
+export function mapsSearchUrl(card: {
+  name: string;
+  address?: string | null;
+}): string {
+  const q = [card.name, card.address].filter(Boolean).join(" ");
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
 /** Foto olmayan kartlarda gösterilecek kategori emojisi (görsel ipucu). */
 export function categoryEmoji(text?: string | null): string {
   const t = (text ?? "").toLowerCase();
