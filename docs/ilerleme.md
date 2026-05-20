@@ -11,7 +11,7 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 | 1 | İskelet + kimlik (isim + uuid, localStorage) | ✅ Bitti |
 | 2 | Ana ekran + oturum kurma + eşik seçimi | ✅ Bitti |
 | 3 | Kart üretimi (DeepSeek + OpenStreetMap) | ✅ Çalışıyor (foto kısıtı: aşağıya bak) |
-| 4 | Kaydırma UI | ⬜ Bekliyor |
+| 4 | Kaydırma (swipe) UI | ✅ Çalışıyor (jest tarayıcıda doğrulanmalı) |
 | 5 | Eşleşme + realtime + konfeti | ⬜ Bekliyor |
 
 ## Adım 1 — İskelet + kimlik ✅
@@ -20,7 +20,32 @@ Karar ve gerekçeler için: `docs/urun-kararlari.md`.
 - İsim girme ekranı (`components/NameScreen.tsx`).
 - Kimlik: isim + gizli `uuid`, `localStorage`'da (`lib/identity.ts`). Auth yok.
 
+## Adım 4 — Kaydırma (swipe) UI ✅
+
+- `components/SwipeDeck.tsx`: kartları tek tek gösterir; sağa beğen / sola geç
+  (sürükle + ❤️/✖️ butonları), ilerleme sayacı, sürükleme ipucu (BEĞEN/GEÇ),
+  bitince beğenilenlerin özeti + "baştan kaydır".
+- `components/CardFace.tsx`: kartın görsel yüzü; foto yoksa kategori emojili şık
+  placeholder (`categoryEmoji`).
+- Saf swipe mantığı `lib/swipe.ts` (`swipeDecision`, `dragRotation`, `dragHint`)
+  ayrı ve test edildi.
+- **Not:** Sürükleme jesti bu başsız ortamda elle test edilemedi; Vercel preview /
+  gerçek tarayıcıda denenmeli. Buton akışı ve mantık test/build'de doğrulandı.
+- Tek cihazda bu kullanıcının beğenileri toplanır; **grup eşleşmesi + realtime
+  5. adımda** (Supabase) gelecek.
+
 ## Adım 3 — Kart üretimi ✅ (foto kısıtlı)
+
+- **Kategoriler genişledi:** yeme-içme + **konaklama** (otel/pansiyon/hostel) +
+  **aktivite** (gezilecek yer/müze/manzara/park/spa). DeepSeek bu türleri seçer,
+  `lib/osm.ts` her türü OSM etiket seçicisine açar.
+- **Güvenilirlik:** Overpass `around` poligonlarda timeout/504 veriyordu →
+  **bounding-box** sorgusuna geçildi (hızlı, stabil). Ayrıca HTTP 200 içindeki
+  `remark` timeout'u hata sayılıyor ve birden çok Overpass sunucusu sırayla deneniyor.
+- **Yorum/puan yok:** OSM'de rating/yorum/foto olmadığından "en iyi" sıralama ve
+  yorum gösterimi bu kaynakta mümkün değil (kullanıcı $0/kartsızı seçti). İleride
+  foto/yorum istenirse kart-gerektiren kaynak (Google/Foursquare) gerekecek.
+
 
 - **Beyin DeepSeek** (Claude yerine): `deepseek-chat` (= `deepseek-v4-flash`),
   OpenAI-uyumlu API. Serbest cümleden `near` + OSM `kinds` + `keywords` ayıklar

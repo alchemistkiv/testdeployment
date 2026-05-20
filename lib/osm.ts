@@ -4,20 +4,71 @@
 import { osmElementToCard, type Card, type PlaceQuery } from "./cards";
 
 const NOMINATIM = "https://nominatim.openstreetmap.org/search";
-const OVERPASS = "https://overpass-api.de/api/interpreter";
+// Public Overpass sunucuları yük altında zaman aşımına düşebiliyor; sırayla deneriz.
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
 // OSM kullanım politikası geçerli bir User-Agent ister; UA'sız istekler reddedilir.
 const USER_AGENT = "balichoice/0.1 (group decision app)";
 const SEARCH_RADIUS = 2500;
 
-const ALLOWED_KINDS = new Set([
-  "cafe",
-  "restaurant",
-  "bar",
-  "pub",
-  "fast_food",
-  "ice_cream",
-  "biergarten",
-]);
+// Overpass'ı çalıştırır; bir sunucu hata/timeout verirse sıradakine geçer.
+// Önemli: Overpass HTTP 200 dönüp gövdede "remark" ile timeout bildirebiliyor.
+async function runOverpass(ql: string): Promise<unknown[]> {
+  let lastError: Error | null = null;
+  for (const url of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "User-Agent": USER_AGENT,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `data=${encodeURIComponent(ql)}`,
+      });
+      if (!res.ok) {
+        lastError = new Error(`Overpass ${res.status}`);
+        continue;
+      }
+      const data = (await res.json()) as { elements?: unknown[]; remark?: string };
+      if (typeof data.remark === "string" && /timed out|error/i.test(data.remark)) {
+        lastError = new Error(`Overpass: ${data.remark}`);
+        continue;
+      }
+      return Array.isArray(data.elements) ? data.elements : [];
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error("Overpass bağlantı hatası");
+    }
+  }
+  throw lastError ?? new Error("Overpass erişilemedi.");
+}
+
+// Anlamsal tür → OSM etiket seçicileri. DeepSeek bu anahtarlardan üretir.
+const KIND_SELECTORS: Record<string, string[]> = {
+  // Yeme-içme
+  cafe: ["amenity=cafe"],
+  restaurant: ["amenity=restaurant"],
+  bar: ["amenity=bar", "amenity=pub"],
+  fast_food: ["amenity=fast_food"],
+  ice_cream: ["amenity=ice_cream"],
+  nightclub: ["amenity=nightclub"],
+  // Konaklama
+  hotel: ["tourism=hotel"],
+  hostel: ["tourism=hostel"],
+  guesthouse: ["tourism=guest_house"],
+  resort: ["tourism=hotel", "leisure=resort"],
+  // Aktivite / gezilecek
+  attraction: ["tourism=attraction"],
+  museum: ["tourism=museum"],
+  gallery: ["tourism=gallery"],
+  viewpoint: ["tourism=viewpoint"],
+  themepark: ["tourism=theme_park"],
+  zoo: ["tourism=zoo"],
+  park: ["leisure=park"],
+  spa: ["leisure=spa", "amenity=spa"],
+};
 
 async function geocode(near: string): Promise<{ lat: number; lon: number }> {
   const url = `${NOMINATIM}?q=${encodeURIComponent(near)}&format=json&limit=1`;
@@ -39,31 +90,29 @@ export async function searchPlaces(
   q: PlaceQuery,
   limit = 15
 ): Promise<Card[]> {
-  const kinds = q.kinds.filter((k) => ALLOWED_KINDS.has(k));
+  const kinds = q.kinds.filter((k) => k in KIND_SELECTORS);
   const useKinds = kinds.length ? kinds : ["cafe", "restaurant"];
 
   const center = await geocode(q.near);
 
+  // Bounding-box (around yerine): poligonlarda çok daha hızlı ve public
+  // sunucularda güvenilir. Mesafeyi yine merkeze göre haversine ile hesaplarız.
+  const latDelta = SEARCH_RADIUS / 111320;
+  const lonDelta =
+    SEARCH_RADIUS / (111320 * Math.cos((center.lat * Math.PI) / 180));
+  const bbox = `${center.lat - latDelta},${center.lon - lonDelta},${
+    center.lat + latDelta
+  },${center.lon + lonDelta}`;
+
+  // Her anlamsal tür bir veya birden çok OSM seçicisine açılır.
+  // İlişkileri (relation) atlayıp node+way (nw) kullanmak sorguyu hafifletir.
   const selectors = useKinds
-    .map(
-      (k) =>
-        `nwr[amenity=${k}][name](around:${SEARCH_RADIUS},${center.lat},${center.lon});`
-    )
+    .flatMap((k) => KIND_SELECTORS[k])
+    .map((sel) => `nw[${sel}][name](${bbox});`)
     .join("");
-  const ql = `[out:json][timeout:25];(${selectors});out center 80;`;
+  const ql = `[out:json][timeout:25];(${selectors});out center 60;`;
 
-  const res = await fetch(OVERPASS, {
-    method: "POST",
-    headers: {
-      "User-Agent": USER_AGENT,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `data=${encodeURIComponent(ql)}`,
-  });
-  if (!res.ok) throw new Error(`Overpass ${res.status}`);
-
-  const data = (await res.json()) as { elements?: unknown[] };
-  const elements = Array.isArray(data.elements) ? data.elements : [];
+  const elements = await runOverpass(ql);
 
   // İsme göre tekilleştir.
   const seen = new Set<string>();

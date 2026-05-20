@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  categoryEmoji,
   formatDistance,
   haversineMeters,
   osmAddress,
@@ -47,9 +48,12 @@ describe("osmCategory", () => {
   it("mutfak öncelikli ve okunur", () => {
     expect(osmCategory({ cuisine: "coffee_shop;breakfast" })).toBe("Coffee shop");
   });
-  it("mutfak yoksa amenity etiketi (TR)", () => {
+  it("mutfak yoksa tür etiketi (amenity/tourism/leisure, TR)", () => {
     expect(osmCategory({ amenity: "restaurant" })).toBe("Restoran");
     expect(osmCategory({ amenity: "cafe" })).toBe("Kafe");
+    expect(osmCategory({ tourism: "hotel" })).toBe("Otel");
+    expect(osmCategory({ tourism: "attraction" })).toBe("Gezilecek yer");
+    expect(osmCategory({ leisure: "park" })).toBe("Park");
   });
   it("hiçbiri yoksa null", () => {
     expect(osmCategory({})).toBeNull();
@@ -84,6 +88,19 @@ describe("osmPhoto", () => {
   it("foto yoksa null", () => {
     expect(osmPhoto({})).toBeNull();
     expect(osmPhoto({ image: "not-a-url" })).toBeNull();
+  });
+});
+
+describe("categoryEmoji", () => {
+  it("kategoriye göre emoji seçer", () => {
+    expect(categoryEmoji("Kafe")).toBe("☕");
+    expect(categoryEmoji("Restoran")).toBe("🍽️");
+    expect(categoryEmoji("Otel")).toBe("🏨");
+    expect(categoryEmoji("Müze")).toBe("🏛️");
+  });
+  it("bilinmeyende varsayılan pin", () => {
+    expect(categoryEmoji(null)).toBe("📍");
+    expect(categoryEmoji("xyz")).toBe("📍");
   });
 });
 

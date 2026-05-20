@@ -9,8 +9,12 @@ const MODEL = "deepseek-chat"; // şu an deepseek-v4-flash'a çözümleniyor
 const SYSTEM_PROMPT = `You convert a free-text request (Turkish or English) into parameters for an OpenStreetMap venue search.
 Return ONLY a JSON object with these keys:
 - "near": string — a place name a geocoder can resolve (the neighborhood/city/area mentioned).
-- "kinds": array of strings — pick from EXACTLY this set: "cafe","restaurant","bar","pub","fast_food","ice_cream","biergarten". Map: coffee/tea -> "cafe"; dinner/lunch/meal/food -> "restaurant"; drinks/cocktails -> "bar" (and "pub"); burgers/quick bite -> "fast_food". Include 1-2 most relevant kinds.
-- "keywords": array of SHORT lowercase english keywords for cuisine/vibe (e.g. ["vegan"], ["rooftop"], ["seafood"], ["coffee"]). Use [] if none implied.
+- "kinds": array of strings — pick from EXACTLY this set:
+  food/drink: "cafe","restaurant","bar","fast_food","ice_cream","nightclub";
+  stay: "hotel","hostel","guesthouse","resort";
+  activity/sightseeing: "attraction","museum","gallery","viewpoint","themepark","zoo","park","spa".
+  Map examples: coffee/tea -> "cafe"; dinner/lunch/meal/food -> "restaurant"; drinks/cocktails -> "bar"; quick bite -> "fast_food"; stay/sleep/accommodation/hotel -> "hotel" (+ "guesthouse"/"hostel" if budget); things to do/sightseeing/activity -> "attraction" (+ "museum"/"viewpoint"/"park" as fitting). Include 1-3 most relevant kinds.
+- "keywords": array of SHORT lowercase english keywords for cuisine/vibe (e.g. ["vegan"], ["rooftop"], ["seafood"], ["family"], ["luxury"]). Use [] if none implied.
 Output JSON only, no prose.`;
 
 export async function parseTopic(topic: string): Promise<PlaceQuery> {

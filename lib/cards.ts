@@ -26,7 +26,8 @@ export type PlaceQuery = {
   keywords: string[];
 };
 
-const AMENITY_LABELS: Record<string, string> = {
+// OSM tür değeri (amenity/tourism/leisure) → okunur TR etiket.
+const TYPE_LABELS: Record<string, string> = {
   cafe: "Kafe",
   restaurant: "Restoran",
   bar: "Bar",
@@ -34,6 +35,19 @@ const AMENITY_LABELS: Record<string, string> = {
   fast_food: "Fast food",
   ice_cream: "Dondurma",
   biergarten: "Biergarten",
+  nightclub: "Gece kulübü",
+  spa: "Spa",
+  hotel: "Otel",
+  hostel: "Hostel",
+  guest_house: "Pansiyon",
+  resort: "Resort",
+  attraction: "Gezilecek yer",
+  museum: "Müze",
+  viewpoint: "Manzara noktası",
+  gallery: "Sanat galerisi",
+  theme_park: "Tema parkı",
+  zoo: "Hayvanat bahçesi",
+  park: "Park",
 };
 
 /** 1–4 fiyat seviyesini "$"–"$$$$" etiketine çevirir (varsa). */
@@ -71,12 +85,12 @@ function titleize(s: string): string {
   return t ? t[0].toUpperCase() + t.slice(1) : t;
 }
 
-/** OSM etiketlerinden kategori metni (mutfak öncelikli, yoksa amenity). */
+/** OSM etiketlerinden kategori metni (mutfak öncelikli, yoksa tür). */
 export function osmCategory(tags: Record<string, any>): string | null {
   const cuisine = typeof tags?.cuisine === "string" ? tags.cuisine : "";
   if (cuisine) return titleize(cuisine.split(/[;,]/)[0]);
-  const amenity = typeof tags?.amenity === "string" ? tags.amenity : "";
-  if (amenity) return AMENITY_LABELS[amenity] ?? titleize(amenity);
+  const type = tags?.amenity ?? tags?.tourism ?? tags?.leisure;
+  if (typeof type === "string") return TYPE_LABELS[type] ?? titleize(type);
   return null;
 }
 
@@ -106,6 +120,23 @@ export function osmPhoto(tags: Record<string, any>): string | null {
     )}?width=600`;
   }
   return null;
+}
+
+/** Foto olmayan kartlarda gösterilecek kategori emojisi (görsel ipucu). */
+export function categoryEmoji(text?: string | null): string {
+  const t = (text ?? "").toLowerCase();
+  if (/kafe|coffee|cafe|çay|tea/.test(t)) return "☕";
+  if (/fast|burger/.test(t)) return "🍔";
+  if (/dondurma|ice/.test(t)) return "🍦";
+  if (/bar|pub|cocktail|drink|gece|night/.test(t)) return "🍸";
+  if (/restoran|restaurant|yemek|food|dinner|lunch|mutfak/.test(t)) return "🍽️";
+  if (/otel|hotel|hostel|pansiyon|guest|resort|konaklama|stay/.test(t)) return "🏨";
+  if (/müze|museum|galeri|gallery|sanat|art/.test(t)) return "🏛️";
+  if (/manzara|view/.test(t)) return "🌄";
+  if (/park|bahçe|garden/.test(t)) return "🌳";
+  if (/spa/.test(t)) return "💆";
+  if (/gezilecek|attraction|tema|theme|zoo/.test(t)) return "🎡";
+  return "📍";
 }
 
 /** Overpass element'ini Card'a çevirir; mesafe merkeze göre hesaplanır. */
